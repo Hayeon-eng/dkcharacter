@@ -1,33 +1,26 @@
-# 사무실 빌런 도감
+# Office Villain Test
 
-동기 13인용 범용 회사원 업무 빌런 테스트입니다.
+회사 동기들끼리 돌리는 캡쳐용 오피스 빌런 유형 테스트입니다.
 
-## 구조
-
-```text
-index.html
-main.js
-style.css
-package.json
-README.md
-```
-
-## Render Static Site 설정
-
-Build Command
+## 실행
 
 ```bash
-npm install && npm run build
+# 별도 빌드 없음
+open index.html
 ```
 
-Publish Directory
+또는 GitHub Pages에 레포 루트 그대로 배포하면 됩니다.
 
-```bash
-dist
-```
+## 파일 구성
 
-Environment Variable
+- `index.html` - 앱 엔트리
+- `style.css` - iOS 젤리/스티커 스타일 UI
+- `main.js` - 질문, 결과 타입, 렌더링 로직
 
-```bash
-NODE_VERSION=20.19.0
-```
+## 특징
+
+- 10개 빌런 유형
+- MBTI식 클릭 진단
+- 궁합/상극 유형
+- 결과 화면 이미지 저장 버튼
+- 모바일 캡쳐에 최적화된 세로형 UI

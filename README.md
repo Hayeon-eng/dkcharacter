@@ -1,26 +1,34 @@
 # Office Villain Test
 
-회사 동기들끼리 돌리는 캡쳐용 오피스 빌런 유형 테스트입니다.
+회사 동기들끼리 하는 오피스 빌런 유형 테스트입니다.
+
+## 파일 구조
+
+```txt
+index.html
+style.css
+main.js
+README.md
+```
 
 ## 실행
 
-```bash
-# 별도 빌드 없음
-open index.html
-```
+별도 설치 없이 `index.html`을 열면 됩니다.
 
-또는 GitHub Pages에 레포 루트 그대로 배포하면 됩니다.
+## 배포
 
-## 파일 구성
+### GitHub Pages
 
-- `index.html` - 앱 엔트리
-- `style.css` - iOS 젤리/스티커 스타일 UI
-- `main.js` - 질문, 결과 타입, 렌더링 로직
+1. 이 파일들을 레포 루트에 업로드
+2. Settings > Pages
+3. Deploy from branch
+4. main / root 선택
 
-## 특징
+### Render Static Site
 
-- 10개 빌런 유형
-- MBTI식 클릭 진단
-- 궁합/상극 유형
-- 결과 화면 이미지 저장 버튼
-- 모바일 캡쳐에 최적화된 세로형 UI
+- Build Command: 비워두기 또는 `echo static`
+- Publish Directory: `.`
+
+## 주의
+
+이 프로젝트는 정적 HTML/CSS/JS 사이트라서 `npm install` 또는 `npm run build`가 필요 없습니다.

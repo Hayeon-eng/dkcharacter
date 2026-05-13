@@ -1,603 +1,475 @@
-const villainTypes = {
-  bombHamster: {
+const types = {
+  bomb: {
     name: "퇴근직전 폭탄러",
     emoji: "💣",
-    icon: "🐹",
-    animal: "hamster",
-    badge: "BEST VILLAIN",
-    color: "#ff4f87",
-    color2: "#ffd15c",
-    glow: "#ff9ec2",
-    title: "퇴근 10분 전, 모두가 마음의 준비를 할 때 폭탄을 던진다.",
-    quote: "아 맞다! 이것도 추가 가능할 듯?",
-    roast: "본인은 '좋은 아이디어 공유'라고 생각하지만, 팀원들은 이미 심폐소생술 준비 중이다.",
-    danger: 98,
-    keywords: ["퇴근 파괴", "순수한 악의 없음", "마감 직전 반짝임"],
-    catchphrases: ["급한 건 아닌데 생각나서요 ㅎ", "이것만 넣으면 더 좋을 듯!", "오늘 안 해도 돼요. 근데 지금 보면 좋긴 해요"],
-    pattern: ["오후 5:51에 갑자기 천재가 됨", "본인은 도움이라고 믿음", "수정사항을 '작은 것'이라고 부름"],
-    passive: ["폭탄 드롭: 모두의 평온을 한 문장으로 삭제", "선의의 빌런: 죄책감 없이 채팅방을 얼림", "마감 감각 마비: 퇴근 시간이 가까울수록 아이디어가 맑아짐"],
-    stats: { "팀원 혈압": 98, "아이디어력": 96, "눈치 삭제": 88, "순수함": 91, "마감 파괴": 99 },
-    good: "마감직전 각성귀",
+    color: "#B8E986",
+    soft: "#F3FFE6",
+    one: "퇴근 12분 전에 갑자기 세상을 바꾸려는 해맑은 재앙.",
+    quote: "아 맞다, 이것도 추가 가능할 듯?",
+    propBig: "💣",
+    propSmall: "👜",
+    traits: [
+      "본인은 좋은 아이디어를 공유했다고 믿는다.",
+      "타이밍만 이상할 뿐 내용은 묘하게 맞는 말이라 더 화난다.",
+      "팀원의 퇴근 버튼 위에 조용히 손을 얹는다."
+    ],
+    stats: { "팀원 혈압": 97, "해맑음": 91, "마감 파괴력": 88 },
+    good: "마감직전 각성형",
     bad: "체크리스트 수호자",
-    goodRate: 92,
-    badRate: 17
+    goodText: "어차피 둘 다 막판에 불이 붙어서 이상하게 굴러감.",
+    badText: "수호자는 이미 체크를 끝냈고, 너는 그 체크리스트를 다시 태움."
   },
-  ghostReader: {
-    name: "읽씹 잠수유령",
+  ghost: {
+    name: "읽씹 잠수요정",
     emoji: "👻",
-    icon: "📱",
-    animal: "ghost",
-    badge: "SILENT DAMAGE",
-    color: "#8d6bff",
-    color2: "#7ee8ff",
-    glow: "#c7b8ff",
-    title: "읽음은 찍혔는데 영혼은 다른 세계로 퇴근했다.",
-    quote: "아 나 답장한 줄 알았어.",
-    roast: "메신저를 읽고 머릿속으로 답장하는 신종 텔레파시형 직장인. 문제는 아무도 못 듣는다.",
-    danger: 89,
-    keywords: ["읽음 1", "머릿속 답장", "갑자기 등장"],
-    catchphrases: ["앗 지금 봤어요", "아 그거 확인했어요", "보내려고 했는데..."],
-    pattern: ["중요한 메시지만 골라서 사라짐", "회의 때는 갑자기 많이 앎", "답장 대신 표정으로 해결하려 함"],
-    passive: ["투명화: 알림을 보고도 존재감 삭제", "기억 왜곡: 실제로 답했다고 믿음", "급등장: 모두가 포기할 때 나타남"],
-    stats: { "잠수력": 99, "읽음 민첩성": 96, "답장 확률": 21, "평온함": 92, "팀원 불안": 88 },
-    good: "회의증식 문어",
-    bad: "체크리스트 수호자",
-    goodRate: 81,
-    badRate: 12
-  },
-  meetingOctopus: {
-    name: "회의증식 문어",
-    emoji: "🐙",
-    icon: "☕",
-    animal: "octopus",
-    badge: "MEETING FACTORY",
-    color: "#ff7a59",
-    color2: "#ffe66d",
-    glow: "#ffb097",
-    title: "회의를 끝내기 위한 회의를 잡고, 그 회의의 사전회의를 연다.",
-    quote: "이건 한번 싱크 맞추고 가시죠.",
-    roast: "일을 안 하는 건 아니다. 다만 일이 회의에 잡아먹혀 실종될 뿐이다.",
-    danger: 94,
-    keywords: ["싱크 맞춤", "회의 캘린더 테러", "논의 지옥"],
-    catchphrases: ["15분만 잡을게요", "아젠다만 짧게", "이건 따로 논의하시죠"],
-    pattern: ["회의가 끝나면 할 일이 생김", "그 할 일을 위해 회의를 또 잡음", "캘린더를 테트리스처럼 채움"],
-    passive: ["캘린더 번식: 빈칸을 보면 마음이 불안", "15분 사기: 절대 15분에 안 끝남", "싱크 중독: 모두가 같은 말을 할 때까지 회전"],
-    stats: { "회의력": 100, "캘린더 장악": 97, "실행 지연": 86, "말랑한 압박": 91, "커피 의존": 88 },
-    good: "메모장 전략가",
-    bad: "일단발사 로켓냥",
-    goodRate: 87,
-    badRate: 24
-  },
-  tabMouse: {
-    name: "탭50개 실험쥐",
-    emoji: "🧪",
-    icon: "🐭",
-    animal: "mouse",
-    badge: "BETA GREMLIN",
-    color: "#22c55e",
-    color2: "#67e8f9",
-    glow: "#9effc0",
-    title: "새 툴, 새 템플릿, 새 방식 보면 일단 팀 전체를 실험실에 넣는다.",
-    quote: "이거 새 툴인데 진짜 미쳤어요.",
-    roast: "도입은 번개같고 정착은 유령같다. 3일 뒤 아무도 그 링크를 찾지 못한다.",
-    danger: 86,
-    keywords: ["베타 중독", "툴 유목민", "3일 천하"],
-    catchphrases: ["이거 한번만 써보실래요?", "노션 구조 갈아엎었어요", "이게 더 효율적일 듯"],
-    pattern: ["새 서비스 발견하면 눈이 반짝임", "팀 문서를 갑자기 이사시킴", "전파하고 본인이 먼저 질림"],
-    passive: ["툴 전염: 아무도 원하지 않은 가입을 유도", "탭 증식: 브라우저가 비명을 지름", "베타 사랑: 안정화되면 흥미가 식음"],
-    stats: { "실험욕": 100, "탭 개수": 98, "정착률": 32, "전파력": 90, "혼란 생성": 84 },
-    good: "데이터 부검쿼카",
-    bad: "체크리스트 수호자",
-    goodRate: 76,
-    badRate: 28
-  },
-  fontRabbit: {
-    name: "감성폰트 수호토끼",
-    emoji: "🎀",
-    icon: "🐰",
-    animal: "rabbit",
-    badge: "MOOD POLICE",
-    color: "#ff6fb1",
-    color2: "#b794ff",
-    glow: "#ffc1df",
-    title: "1px 어긋남과 묘하게 안 맞는 톤을 보는 순간 영혼이 흔들린다.",
-    quote: "좋은데... 무드가 살짝 안 맞아요.",
-    roast: "대부분 못 보는 걸 너무 잘 봐서 문제다. 본인 눈엔 회사 전체가 미완성 시안이다.",
-    danger: 83,
-    keywords: ["폰트 경찰", "무드 집착", "여백 감별사"],
-    catchphrases: ["이 폰트는 좀 말이 세요", "여백만 살짝", "컬러 톤이 약간..."],
-    pattern: ["최종본에서 더 선명해짐", "남의 PPT를 마음속으로 리디자인함", "색감이 안 맞으면 표정부터 흐려짐"],
-    passive: ["무드 스캔: 0.3초 만에 어색함 탐지", "최종본 저주: 마지막에 꼭 하나 보임", "폰트 심판: 굴림체를 보면 조용히 상처받음"],
-    stats: { "감성력": 100, "디테일": 97, "수정 유발": 85, "미감 압박": 93, "현실 타협": 41 },
-    good: "일단발사 로켓냥",
-    bad: "탭50개 실험쥐",
-    goodRate: 88,
-    badRate: 31
-  },
-  deadlineGoblin: {
-    name: "마감직전 각성귀",
-    emoji: "🔥",
-    icon: "😈",
-    animal: "goblin",
-    badge: "LAST MINUTE GOD",
-    color: "#fb923c",
-    color2: "#ef4444",
-    glow: "#ffbd8a",
-    title: "평소엔 절전모드, 마감 3시간 전부터 갑자기 인간이 아니다.",
-    quote: "지금부터 하면 돼요. 진짜 돼요.",
-    roast: "남들이 불안해서 울 때 본인은 이제야 뇌가 켜진다. 문제는 결과물이 가끔 좋아서 더 화난다.",
-    danger: 91,
-    keywords: ["마감 버프", "벼락치기 장인", "팀원 수명 단축"],
-    catchphrases: ["아직 시간 있어요", "오늘 안에 됩니다", "집중하면 금방이에요"],
-    pattern: ["초반엔 너무 평온함", "중반엔 사라짐", "마감 직전에 괴물처럼 처리함"],
-    passive: ["마감 버프: 시간이 없을수록 능력치 상승", "불안 면역: 모두가 타도 혼자 차분", "기적 생산: 욕하면서도 결과는 냄"],
-    stats: { "벼락치기": 100, "초반 평온": 94, "팀원 불안": 96, "순간 집중": 99, "사전 준비": 25 },
-    good: "퇴근직전 폭탄러",
-    bad: "회의증식 문어",
-    goodRate: 93,
-    badRate: 20
-  },
-  rocketCat: {
-    name: "일단발사 로켓냥",
-    emoji: "🚀",
-    icon: "🐱",
-    animal: "cat",
-    badge: "SHIP FIRST",
-    color: "#38bdf8",
-    color2: "#a78bfa",
-    glow: "#9ce7ff",
-    title: "검토는 미래의 내가 하고, 현재의 나는 일단 보낸다.",
-    quote: "일단 올렸어요! 수정 가능하죠?",
-    roast: "속도는 미쳤는데 주변 사람 심장도 같이 미친다. 버튼 앞에서 망설임이라는 감정이 없다.",
-    danger: 88,
-    keywords: ["선발사 후수습", "업로드 친화", "검토는 미래"],
-    catchphrases: ["어차피 수정하면 돼요", "일단 공유드려요", "큰 틀은 맞아요"],
-    pattern: ["초안이라는 이름으로 거의 최종을 보냄", "수정 요청을 예상하고도 발사", "일을 멈춰두는 걸 못 참음"],
-    passive: ["발사 버튼 친밀도: 전송 버튼과 내적 친분", "수습 민첩성: 사고 후 손이 빨라짐", "멈춤 공포: 대기 상태를 못 견딤"],
-    stats: { "실행력": 100, "검토 생략": 87, "수습력": 91, "팀원 심박": 84, "속도감": 99 },
-    good: "감성폰트 수호토끼",
-    bad: "회의증식 문어",
-    goodRate: 89,
-    badRate: 18
-  },
-  checklistDino: {
-    name: "체크리스트 수호자",
-    emoji: "📋",
-    icon: "🦖",
-    animal: "dino",
-    badge: "NO MISTAKE ZONE",
-    color: "#14b8a6",
-    color2: "#60a5fa",
-    glow: "#8ffff0",
-    title: "누락, 오탈자, 미정, TBD를 보면 내면의 공룡이 깨어난다.",
-    quote: "잠깐만요. 이거 확인 됐나요?",
-    roast: "모두가 대충 넘어가려는 순간 등장해서 현실을 들이민다. 고맙지만 무섭다.",
-    danger: 85,
-    keywords: ["누락 탐지", "팩트 체크", "최종본 의심"],
-    catchphrases: ["이거 누가 오너예요?", "마감일 적어주세요", "최종본 맞죠?"],
-    pattern: ["엑셀과 체크박스를 믿음", "말로 한 약속을 기록으로 잡아냄", "최종_v7_진짜최종을 믿지 않음"],
-    passive: ["누락 레이더: 빈칸을 냄새로 찾음", "최종본 불신: 파일명을 절대 믿지 않음", "현실 소환: 분위기보다 일정표를 들이밈"],
-    stats: { "검수력": 100, "누락 탐지": 99, "융통성": 37, "신뢰도": 96, "팀원 압박": 82 },
-    good: "읽씹 잠수유령",
+    color: "#A9D7FF",
+    soft: "#EEF8FF",
+    one: "읽고 답한 줄 아는, 회사 메신저계의 미스터리.",
+    quote: "어? 나 답장 안 했어?",
+    propBig: "📱",
+    propSmall: "💬",
+    traits: [
+      "머릿속으로는 이미 장문의 답장을 보냈다.",
+      "회의 때 갑자기 나타나서 맥락을 다 알고 있어 더 무섭다.",
+      "알림 숫자가 너무 커서 이제 감정이 없다."
+    ],
+    stats: { "잠수력": 94, "악의 없음": 99, "답장 지연": 92 },
+    good: "조율 펭귄",
     bad: "퇴근직전 폭탄러",
-    goodRate: 74,
-    badRate: 11
+    goodText: "펭귄이 부드럽게 다시 끌어올려 준다.",
+    badText: "폭탄러는 기다리지 않고 새 폭탄을 하나 더 던진다."
   },
-  memoStrategist: {
+  meeting: {
+    name: "회의 증식 문어",
+    emoji: "🐙",
+    color: "#FFD89C",
+    soft: "#FFF5E6",
+    one: "하나의 이슈를 세 개의 회의로 번식시키는 조직 생태계 교란종.",
+    quote: "이건 한 번 맞춰보고 가시죠.",
+    propBig: "☕",
+    propSmall: "📅",
+    traits: [
+      "정리 미팅의 정리 미팅을 만들 수 있다.",
+      "일을 안 하는 건 아닌데 캘린더가 먼저 질린다.",
+      "회의 끝나면 할 일이 생기고, 그 할 일을 위해 회의를 잡는다."
+    ],
+    stats: { "캘린더 점유율": 96, "말 부드러움": 82, "논의 생산력": 89 },
+    good: "메모장 전략가",
+    bad: "일단 발사형",
+    goodText: "전략가는 말할 세계관이 많고, 문어는 들을 회의가 많다.",
+    badText: "발사형은 회의 초대가 오기 전에 이미 보냈다."
+  },
+  checklist: {
+    name: "체크리스트 수호자",
+    emoji: "✅",
+    color: "#FFE88A",
+    soft: "#FFFBE8",
+    one: "오탈자와 누락을 보면 심장이 먼저 반응하는 최종본 감시자.",
+    quote: "잠깐만, 여기 하나만 확인하고.",
+    propBig: "📋",
+    propSmall: "🔍",
+    traits: [
+      "최종_final_진짜최종 파일도 믿지 않는다.",
+      "남들은 못 본 1픽셀의 틀어짐을 보고 하루가 망한다.",
+      "팀을 살리지만 팀을 약간 숨 막히게도 한다."
+    ],
+    stats: { "검수력": 99, "불안 탐지": 93, "최종 의심": 95 },
+    good: "일단 발사형",
+    bad: "퇴근직전 폭탄러",
+    goodText: "발사형이 쏘면 수호자가 수습해서 기적의 밸런스.",
+    badText: "이미 닫은 문서를 다시 여는 사람과 평화로울 수 없음."
+  },
+  launcher: {
+    name: "일단 발사형",
+    emoji: "🚀",
+    color: "#FFB4A2",
+    soft: "#FFF0EC",
+    one: "보내고 생각한다. 근데 가끔 그게 맞아서 더 위험하다.",
+    quote: "일단 공유드렸습니다!",
+    propBig: "🚀",
+    propSmall: "📎",
+    traits: [
+      "검토보다 공유 버튼이 빠르다.",
+      "수정 가능하다는 말을 신앙처럼 믿는다.",
+      "멈춘 일에 산소호흡기를 꽂는 타입. 가끔 산소가 과하다."
+    ],
+    stats: { "실행 속도": 98, "후수습": 87, "검토 생략": 79 },
+    good: "체크리스트 수호자",
+    bad: "회의 증식 문어",
+    goodText: "너는 쏘고, 수호자는 조준을 맞춘다.",
+    badText: "문어가 회의를 잡는 동안 이미 세 번 보냄."
+  },
+  font: {
+    name: "감성 폰트수호신",
+    emoji: "🎨",
+    color: "#FFC7E8",
+    soft: "#FFF0F8",
+    one: "내용보다 무드가 삐끗하면 먼저 아픈 사람.",
+    quote: "좋은데, 지금 톤이 살짝 안 맞아.",
+    propBig: "🎨",
+    propSmall: "🖋️",
+    traits: [
+      "폰트가 바뀌면 분위기가 바뀌고, 분위기가 바뀌면 세계가 무너진다.",
+      "레퍼런스 폴더가 작은 박물관 수준이다.",
+      "감으로 말하는 것 같지만 대체로 맞아서 반박이 어렵다."
+    ],
+    stats: { "무드 감지": 98, "폰트 민감도": 94, "마지막 수정": 88 },
+    good: "메모장 전략가",
+    bad: "일단 발사형",
+    goodText: "전략가가 판을 짜면 수호신이 보기 좋게 만든다.",
+    badText: "발사형은 네가 폰트 고르기 전에 이미 링크를 뿌렸다."
+  },
+  lab: {
+    name: "새 툴 실험쥐",
+    emoji: "🧪",
+    color: "#BFF4EA",
+    soft: "#EEFFFB",
+    one: "새로운 협업툴을 보면 눈이 반짝이고, 팀은 조용히 긴장한다.",
+    quote: "이거 써보면 진짜 편할 것 같은데?",
+    propBig: "🧪",
+    propSmall: "🖥️",
+    traits: [
+      "좋은 툴을 찾는 게 아니라 툴을 찾는 행위가 좋다.",
+      "노션 구조를 갈아엎고 3일 뒤 본인도 헷갈려 한다.",
+      "그래도 가끔 진짜 좋은 걸 물어와서 퇴출은 안 된다."
+    ],
+    stats: { "새 탭 개수": 96, "도입 욕구": 93, "유기 확률": 71 },
+    good: "읽씹 잠수요정",
+    bad: "체크리스트 수호자",
+    goodText: "요정은 새 툴 초대장을 읽고 조용히 사라져 평화롭다.",
+    badText: "수호자는 기존 프로세스 문서를 아직 사랑한다."
+  },
+  deadline: {
+    name: "마감직전 각성형",
+    emoji: "🔥",
+    color: "#FFCF70",
+    soft: "#FFF7E5",
+    one: "평소엔 절전모드, 마감 앞에서는 갑자기 괴물이 된다.",
+    quote: "오늘 안에는 됩니다.",
+    propBig: "🔥",
+    propSmall: "⏰",
+    traits: [
+      "오전의 나와 오후 5시의 내가 다른 사람이다.",
+      "주변 사람을 불안하게 하지만 결과물은 또 나온다.",
+      "마감이 없으면 동기부여도 없다."
+    ],
+    stats: { "막판 화력": 99, "평소 절전": 81, "기적 생산": 92 },
+    good: "퇴근직전 폭탄러",
+    bad: "조율 펭귄",
+    goodText: "폭탄이 떨어지면 너는 이상하게 살아난다.",
+    badText: "펭귄은 미리미리를 믿고, 너는 벼랑 끝을 믿는다."
+  },
+  strategy: {
     name: "메모장 전략가",
     emoji: "🧠",
-    icon: "📝",
-    animal: "memo",
-    badge: "BIG PICTURE GHOST",
-    color: "#6366f1",
-    color2: "#f472b6",
-    glow: "#b4b7ff",
-    title: "머릿속에서는 이미 대서사시인데, 공유문서는 아직 제목만 있다.",
-    quote: "제가 생각한 흐름은 좀 큰데요.",
-    roast: "말을 듣다 보면 분명 대단하다. 근데 끝나고 나면 모두가 '그래서 뭐부터?' 상태가 된다.",
-    danger: 82,
-    keywords: ["큰그림 장인", "문서 제목뿐", "말로는 유니콘"],
-    catchphrases: ["맥락을 먼저 보면", "이건 단기보다 장기적으로", "제가 러프하게 정리해볼게요"],
-    pattern: ["화이트보드 앞에서 강해짐", "설명하다가 세계관 확장", "실행 단위로 쪼개면 잠깐 조용해짐"],
-    passive: ["세계관 확장: 작은 일도 3개년 로드맵화", "맥락 폭격: 질문 하나에 배경 15분", "문서 지연: 제목은 완벽함"],
-    stats: { "큰그림": 100, "설명력": 92, "실행분해": 48, "설득력": 90, "회의 길이": 86 },
-    good: "회의증식 문어",
-    bad: "일단발사 로켓냥",
-    goodRate: 86,
-    badRate: 26
+    color: "#CFC7FF",
+    soft: "#F3F0FF",
+    one: "머릿속에는 이미 3개년 로드맵이 있는데 파일명은 아직 untitled.",
+    quote: "이게 결국 큰 흐름에서 보면요.",
+    propBig: "🧠",
+    propSmall: "📝",
+    traits: [
+      "설명은 거대한데 첫 줄 쓰는 데 오래 걸린다.",
+      "갑자기 판을 크게 만들어 사람들을 설득한다.",
+      "생각이 많아서 가끔 본인도 길을 잃는다."
+    ],
+    stats: { "큰그림": 98, "말 길이": 87, "착수 지연": 76 },
+    good: "회의 증식 문어",
+    bad: "일단 발사형",
+    goodText: "문어가 회의를 열고, 전략가는 세계관을 푼다.",
+    badText: "발사형은 네가 배경 설명할 때 이미 결과를 공유했다."
   },
-  dataQuokka: {
-    name: "데이터 부검쿼카",
-    emoji: "📊",
-    icon: "🦫",
-    animal: "quokka",
-    badge: "NUMBER GOBLIN",
-    color: "#06b6d4",
-    color2: "#84cc16",
-    glow: "#9df3ff",
-    title: "감으로 정하자는 말이 들리면 조용히 시트를 연다.",
-    quote: "근거가 혹시 있을까요?",
-    roast: "숫자는 친구고 감성은 참고자료다. 대화하다 보면 어느새 모두가 피벗테이블 앞에 앉아있다.",
-    danger: 87,
-    keywords: ["근거 요구", "시트 소환", "감성 진압"],
-    catchphrases: ["데이터 한번 볼까요?", "샘플 수가 좀 적네요", "이건 상관관계일 수도"],
-    pattern: ["분위기 좋은 아이디어에 찬물을 뿌림", "근데 대체로 맞는 말이라 더 열받음", "대시보드를 안정제처럼 봄"],
-    passive: ["팩트 방패: 감정 공격 무효화", "시트 소환: 논의가 길어지면 표를 꺼냄", "차가운 다정함: 사람은 좋아하지만 근거는 더 좋아함"],
-    stats: { "근거 집착": 100, "감성 차단": 78, "분석력": 97, "대시보드 체류": 94, "분위기 냉각": 82 },
-    good: "탭50개 실험쥐",
-    bad: "감성폰트 수호토끼",
-    goodRate: 84,
-    badRate: 23
+  penguin: {
+    name: "조율 펭귄",
+    emoji: "🐧",
+    color: "#A9D7FF",
+    soft: "#EEF8FF",
+    one: "모두가 이상해질 때 혼자 회의록을 정리하는 사회생활 보호종.",
+    quote: "그럼 역할만 다시 정리해볼게요.",
+    propBig: "🐧",
+    propSmall: "🤝",
+    traits: [
+      "싸움이 나기 전에 말투를 먼저 부드럽게 만든다.",
+      "본인 일보다 남의 혼란을 정리하다가 하루가 끝난다.",
+      "팀을 살리지만 정작 본인은 조용히 닳는다."
+    ],
+    stats: { "중재력": 98, "회의록": 91, "혼자 참음": 89 },
+    good: "읽씹 잠수요정",
+    bad: "마감직전 각성형",
+    goodText: "요정을 다시 수면 위로 올리는 거의 유일한 존재.",
+    badText: "펭귄은 질서를 짜고, 각성형은 마감으로 질서를 만든다."
   }
 };
 
 const questions = [
   {
-    q: "퇴근 10분 전, 당신의 가장 위험한 행동은?",
+    q: "퇴근 20분 전, 입 밖으로 나오면 제일 위험한 말은?",
     options: [
-      ["아 맞다! 이것도 넣으면 좋을 듯", "bombHamster"],
-      ["답장해야지 생각만 하고 사라짐", "ghostReader"],
-      ["내일 아침 9시 회의 초대 발송", "meetingOctopus"],
-      ["새 툴 발견해서 단톡에 링크 투척", "tabMouse"]
+      ["아 맞다, 이것도 추가 가능할 듯?", "bomb", "💣"],
+      ["일단 공유드렸습니다!", "launcher", "🚀"],
+      ["이거 한 번만 더 맞춰보고 가죠.", "meeting", "📅"],
+      ["오늘 안에는 됩니다.", "deadline", "🔥"]
     ]
   },
   {
-    q: "회의 중 내 빌런 모먼트는?",
+    q: "메신저 답장이 늦는 진짜 이유는?",
     options: [
-      ["논의가 끝나면 '정리 미팅'을 제안함", "meetingOctopus"],
-      ["갑자기 큰 그림을 펼쳐 모두를 우주로 보냄", "memoStrategist"],
-      ["말없이 읽고 있다가 마지막에 핵심 질문함", "dataQuokka"],
-      ["일단 해보자며 회의를 강제 종료시킴", "rocketCat"]
+      ["읽고 답한 줄 알았다.", "ghost", "👻"],
+      ["어떻게 답할지 생각하다가 시간이 사라졌다.", "penguin", "🐧"],
+      ["새 툴 알림이랑 섞여서 묻혔다.", "lab", "🧪"],
+      ["큰 흐름을 설명하려다 글이 길어졌다.", "strategy", "🧠"]
     ]
   },
   {
-    q: "단톡방에서 가장 나다운 말은?",
+    q: "회의 중 내가 제일 자주 하는 행동은?",
     options: [
-      ["급한 건 아닌데요 ㅎㅎ", "bombHamster"],
-      ["앗 제가 답장한 줄 알았어요", "ghostReader"],
-      ["이거 오너 누구예요?", "checklistDino"],
-      ["무드가 살짝 안 맞는 것 같아요", "fontRabbit"]
+      ["다음 회의를 자연스럽게 만든다.", "meeting", "🐙"],
+      ["역할과 할 일을 정리한다.", "penguin", "🤝"],
+      ["큰 그림부터 다시 잡는다.", "strategy", "🧠"],
+      ["폰트나 톤이 계속 신경 쓰인다.", "font", "🎨"]
     ]
   },
   {
-    q: "마감이 다가올 때 나는?",
+    q: "문서 최종본을 받았을 때 가장 먼저 드는 생각은?",
     options: [
-      ["그때부터 갑자기 눈빛이 살아남", "deadlineGoblin"],
-      ["체크리스트 켜고 누락자 색출", "checklistDino"],
-      ["초안 보내고 수정으로 때움", "rocketCat"],
-      ["왜 이 결과가 나왔는지 데이터부터 봄", "dataQuokka"]
+      ["최종이 진짜 최종일까?", "checklist", "✅"],
+      ["이 톤이 맞나?", "font", "🎨"],
+      ["일단 보내도 될 듯?", "launcher", "🚀"],
+      ["이 구조 자체를 바꿔야 하지 않나?", "strategy", "🧠"]
     ]
   },
   {
-    q: "동기들이 당신 때문에 제일 많이 하는 표정은?",
+    q: "새 프로젝트가 시작됐다. 나는 제일 먼저 뭘 함?",
     options: [
-      ["하... 지금?", "bombHamster"],
-      ["어디 갔어?", "ghostReader"],
-      ["또 바꿔?", "tabMouse"],
-      ["맞는 말인데 빡쳐", "checklistDino"]
+      ["새 협업툴부터 찾아본다.", "lab", "🧪"],
+      ["일정과 역할을 나눈다.", "penguin", "🐧"],
+      ["바로 초안을 던진다.", "launcher", "🚀"],
+      ["레퍼런스 무드를 모은다.", "font", "🎨"]
     ]
   },
   {
-    q: "새 프로젝트 시작하면 제일 먼저 하는 짓은?",
+    q: "동기가 나를 보고 가장 많이 할 말은?",
     options: [
-      ["일단 캘린더부터 잡음", "meetingOctopus"],
-      ["레퍼런스/폰트/색감부터 봄", "fontRabbit"],
-      ["가설 세우고 테스트판 벌림", "tabMouse"],
-      ["전체 구조와 방향성을 말로 압도함", "memoStrategist"]
+      ["너는 왜 항상 마지막에 생각나?", "bomb", "💣"],
+      ["답장 좀 해.", "ghost", "📱"],
+      ["그만 갈아엎어.", "lab", "🧪"],
+      ["너 없으면 정리는 안 됨.", "penguin", "🤝"]
     ]
   },
   {
-    q: "당신의 업무 생존 방식은?",
+    q: "마감이 가까워질수록 나는?",
     options: [
-      ["마감이 나를 완성한다", "deadlineGoblin"],
-      ["빠르게 쏘고 빠르게 수습한다", "rocketCat"],
-      ["근거 없으면 마음이 안 열린다", "dataQuokka"],
-      ["디테일이 곧 인성이다", "fontRabbit"]
+      ["갑자기 사람이 바뀐다.", "deadline", "🔥"],
+      ["검수 체크리스트가 길어진다.", "checklist", "✅"],
+      ["아이디어가 이제야 또렷해진다.", "bomb", "💣"],
+      ["방향성부터 다시 보고 싶다.", "strategy", "🧠"]
     ]
   },
   {
-    q: "동기들이 당신을 태그할 상황은?",
+    q: "내가 제일 못 참는 상황은?",
     options: [
-      ["누가 마지막에 일 키웠을 때", "bombHamster"],
-      ["회의가 갑자기 4개로 늘었을 때", "meetingOctopus"],
-      ["마감 직전에 기적이 필요할 때", "deadlineGoblin"],
-      ["최종본에서 오탈자 잡아야 할 때", "checklistDino"]
+      ["오탈자 있는데 그냥 나가는 것", "checklist", "🔍"],
+      ["분위기랑 안 맞는데 밀어붙이는 것", "font", "🎨"],
+      ["논의만 하고 아무것도 안 나가는 것", "launcher", "🚀"],
+      ["누가 뭘 하는지 아무도 모르는 것", "penguin", "🐧"]
     ]
   },
   {
-    q: "당신이 제일 싫어하는 말은?",
+    q: "단톡방에 결과 공유하면 제일 듣고 싶은 말은?",
     options: [
-      ["그냥 감으로 가시죠", "dataQuokka"],
-      ["대충 느낌만 맞으면 되죠", "fontRabbit"],
-      ["일단 다음 주에 다시 얘기하죠", "rocketCat"],
-      ["이거 프로세스대로 해야 해요", "tabMouse"]
-    ]
-  },
-  {
-    q: "마지막으로, 당신의 진짜 죄목은?",
-    options: [
-      ["순수한 얼굴로 업무를 추가함", "bombHamster"],
-      ["기록은 완벽한데 실행은 안 보임", "memoStrategist"],
-      ["아무렇지 않게 모두를 불안하게 함", "deadlineGoblin"],
-      ["너무 맞는 말만 해서 킹받게 함", "checklistDino"]
+      ["야 이거 진짜 너다.", "bomb", "💣"],
+      ["너 왜 여기서도 답장 안 해?", "ghost", "👻"],
+      ["인정하기 싫은데 맞음.", "deadline", "🔥"],
+      ["이 테스트 만든 사람 누구냐.", "meeting", "🐙"]
     ]
   }
 ];
 
-let currentIndex = 0;
+let current = 0;
 let scores = {};
-let selectedHistory = [];
-
 const app = document.querySelector("#app");
-const typeKeys = Object.keys(villainTypes);
 
 function resetScores() {
-  scores = Object.fromEntries(typeKeys.map((key) => [key, 0]));
-  selectedHistory = [];
+  scores = Object.fromEntries(Object.keys(types).map((key) => [key, 0]));
 }
 
-function getWinner() {
-  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const topScore = sorted[0][1];
-  const tied = sorted.filter(([, value]) => value === topScore).map(([key]) => key);
-  if (tied.length === 1) return tied[0];
-  for (let i = selectedHistory.length - 1; i >= 0; i -= 1) {
-    if (tied.includes(selectedHistory[i])) return selectedHistory[i];
-  }
-  return sorted[0][0];
-}
-
-function renderShell(content, className = "") {
+function shell(content) {
   app.innerHTML = `
-    <div class="phone-bg ${className}">
-      <div class="noise"></div>
-      <div class="ios-status">
-        <strong>9:41</strong>
-        <span>●●●  5G  🔋</span>
-      </div>
-      <div class="app-shell">
-        ${content}
-      </div>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand"><div class="logo"></div><span>Office Villain Test</span></div>
+        <div class="badge">동기 전용 현실고증 테스트</div>
+      </header>
+      ${content}
     </div>
+    <div class="toast" id="toast">복사 완료. 단톡방에 던져.</div>
   `;
 }
 
-function villainFace(key, size = "large") {
-  const t = villainTypes[key];
-  const faceParts = {
-    hamster: `<div class="ear left"></div><div class="ear right"></div><div class="cheek left"></div><div class="cheek right"></div><div class="bomb-mini">💣</div>`,
-    ghost: `<div class="ghost-tail"></div><div class="phone-mini">📱</div>`,
-    octopus: `<div class="tentacles"><i></i><i></i><i></i><i></i></div><div class="coffee-mini">☕</div>`,
-    mouse: `<div class="ear left"></div><div class="ear right"></div><div class="lab-mini">🧪</div>`,
-    rabbit: `<div class="bunny-ear left"></div><div class="bunny-ear right"></div><div class="ruler-mini">📏</div>`,
-    goblin: `<div class="horn left"></div><div class="horn right"></div><div class="fire-mini">🔥</div>`,
-    cat: `<div class="cat-ear left"></div><div class="cat-ear right"></div><div class="rocket-mini">🚀</div>`,
-    dino: `<div class="spikes"><i></i><i></i><i></i></div><div class="clip-mini">📋</div>`,
-    memo: `<div class="memo-hair"></div><div class="note-mini">📝</div>`,
-    quokka: `<div class="ear left"></div><div class="ear right"></div><div class="chart-mini">📊</div>`
-  };
-
+function character(key) {
+  const t = types[key];
   return `
-    <div class="villain ${size} ${t.animal}" style="--c1:${t.color}; --c2:${t.color2}; --glow:${t.glow}">
-      <div class="sticker-pop">${t.emoji}</div>
-      <div class="head">
-        ${faceParts[t.animal] || ""}
-        <div class="eye left"></div>
-        <div class="eye right"></div>
-        <div class="brow left"></div>
-        <div class="brow right"></div>
-        <div class="nose"></div>
-        <div class="mouth"></div>
-      </div>
-      <div class="body"><span>${t.icon}</span></div>
+    <div class="character" style="--c:${t.color}">
+      <div class="blob"></div>
+      <div class="eye left"></div><div class="eye right"></div>
+      <div class="mouth"></div>
+      <div class="cheek left"></div><div class="cheek right"></div>
       <div class="arm left"></div><div class="arm right"></div>
-      <div class="foot left"></div><div class="foot right"></div>
+      <div class="leg left"></div><div class="leg right"></div>
+      <div class="id-card"></div>
+      <div class="prop big">${t.propBig}</div>
+      <div class="prop small">${t.propSmall}</div>
     </div>
   `;
 }
 
 function renderHome() {
-  renderShell(`
-    <section class="home screen-card">
-      <div class="top-actions">
-        <button class="round-btn">←</button>
-        <button class="share-pill">↗ 공유각</button>
-      </div>
-      <div class="title-area">
-        <p class="eyebrow">회사 동기들이 보는 나의 빌런 유형</p>
-        <h1>나는 어떤<br><span>오피스 빌런</span>일까?</h1>
-        <p class="lead">좋게 포장 안 함. 귀엽게 패줌. 단톡방에서 서로 태그하다가 갑자기 정적 오는 그 테스트.</p>
-      </div>
-      <div class="hero-card" style="--c1:#ff4f87; --c2:#ffd15c; --glow:#ff9ec2">
-        <div class="badge-tilt">SCREENSHOT ME</div>
-        <div class="speech one">아 맞다!<br>이것도 추가 가능?</div>
-        <div class="speech two">퇴근 9분 전입니다만?</div>
-        ${villainFace("bombHamster")}
-        <div class="mini-stat">
-          <span>팀원 혈압 상승 지수</span>
-          <strong>98%</strong>
-          <div><i style="width:98%"></i></div>
+  const featured = "bomb";
+  const t = types[featured];
+  document.documentElement.style.setProperty("--accent", t.color);
+  document.documentElement.style.setProperty("--accent-2", t.soft);
+  shell(`
+    <section class="hero card">
+      <div>
+        <div class="kicker">${t.emoji} 회사에서 나는 무슨 빌런?</div>
+        <h1>나는 어떤<br/>오피스 빌런일까?</h1>
+        <p class="lead">회사 동기들 기준으로 보는 현실고증 업무 빌런 테스트. 결과가 마음에 안 들면? 그게 보통 제일 정확합니다.</p>
+        <div class="hero-actions">
+          <button class="primary" onclick="startTest()">테스트 시작하기</button>
+          <button class="secondary" onclick="showResult('bomb')">결과 미리보기</button>
         </div>
       </div>
-      <button class="primary big" onclick="startTest()">내 빌런력 검사하기 💥</button>
-      <button class="ghost-btn" onclick="showResult('bombHamster')">결과 화면 미리보기</button>
+      <div class="preview">
+        <div class="preview-card">
+          ${character(featured)}
+          <div class="preview-title">퇴근직전 폭탄러</div>
+          <div class="preview-copy">"아 맞다" 한마디로 팀원의 퇴근을 흐리게 하는 타입</div>
+        </div>
+      </div>
     </section>
-  `, "home-bg");
+  `);
 }
 
 function startTest() {
-  currentIndex = 0;
+  current = 0;
   resetScores();
   renderQuestion();
 }
 
 function renderQuestion() {
-  const item = questions[currentIndex];
-  const percent = Math.round((currentIndex / questions.length) * 100);
-  renderShell(`
-    <section class="quiz screen-card">
-      <div class="quiz-head">
-        <button class="round-btn" onclick="renderHome()">←</button>
-        <div class="progress-label">${currentIndex + 1} / ${questions.length}</div>
+  const item = questions[current];
+  const percent = Math.round((current / questions.length) * 100);
+  shell(`
+    <section class="test-card card">
+      <div class="progress-wrap">
+        <div class="progress-label">${current + 1}/${questions.length}</div>
+        <div class="progress"><div style="width:${percent}%"></div></div>
       </div>
-      <div class="progress"><i style="width:${percent}%"></i></div>
-      <div class="question-card">
-        <span class="question-chip">빌런 심문 중</span>
-        <h2>${item.q}</h2>
+      <div class="question-box">
+        <div>${character(Object.keys(types)[current % Object.keys(types).length])}</div>
+        <div>
+          <div class="q-num">QUESTION ${String(current + 1).padStart(2, "0")}</div>
+          <h2 class="question">${item.q}</h2>
+        </div>
       </div>
-      <div class="option-list">
-        ${item.options.map(([text, key], idx) => `
+      <div class="options">
+        ${item.options.map(([text, key, icon]) => `
           <button class="option" onclick="answer('${key}')">
-            <span class="option-icon">${villainTypes[key].emoji}</span>
-            <b>${String.fromCharCode(65 + idx)}</b>
+            <span class="option-icon">${icon}</span>
             <span>${text}</span>
           </button>
         `).join("")}
       </div>
     </section>
-  `, "quiz-bg");
+  `);
 }
 
 function answer(key) {
   scores[key] += 1;
-  selectedHistory.push(key);
-  currentIndex += 1;
-  if (currentIndex >= questions.length) {
-    showResult(getWinner());
-    return;
+  current += 1;
+  if (current >= questions.length) {
+    const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+    showResult(winner);
+  } else {
+    renderQuestion();
   }
-  renderQuestion();
 }
 
 function statRows(stats) {
   return Object.entries(stats).map(([name, value]) => `
-    <div class="stat-row">
-      <div><span>${name}</span><strong>${value}</strong></div>
-      <div class="stat-bar"><i style="width:${value}%"></i></div>
+    <div class="stat-line">
+      <div class="stat-head"><span>${name}</span><span>${value}%</span></div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${value}%"></div></div>
     </div>
   `).join("");
 }
 
-function matchCard(label, typeName, rate, mood) {
-  const key = typeKeys.find((item) => villainTypes[item].name === typeName) || "bombHamster";
-  const t = villainTypes[key];
+function resultHTML(key, capture = false) {
+  const t = types[key];
   return `
-    <div class="match-card ${mood}" style="--c1:${t.color}; --c2:${t.color2}">
-      <div class="match-top"><span>${label}</span><b>${rate}%</b></div>
-      <div class="match-body">
-        ${villainFace(key, "tiny")}
-        <strong>${typeName}</strong>
+    <section class="${capture ? "capture-card" : "result-card card"}" style="--accent:${t.color};--accent-2:${t.soft}">
+      <div class="result-visual">
+        <div class="result-badge">${t.emoji} 나의 오피스 빌런</div>
+        ${character(key)}
+        <h1 class="result-title">${t.name}</h1>
+        <p class="result-one">${t.one}</p>
       </div>
-      <div class="match-bar"><i style="width:${rate}%"></i></div>
-    </div>
+      <div class="result-body">
+        <div class="quote">“${t.quote}”</div>
+        <div class="section">
+          <h3>주요 증상</h3>
+          <ul class="bullets">${t.traits.map((x) => `<li>${x}</li>`).join("")}</ul>
+        </div>
+        <div class="section">
+          <h3>위험 수치</h3>
+          <div class="stat-row">${statRows(t.stats)}</div>
+        </div>
+        <div class="grid2">
+          <div class="match"><small>잘 맞는 빌런</small><strong>${t.good}</strong><p class="result-one" style="text-align:left;font-size:14px;margin-top:8px">${t.goodText}</p></div>
+          <div class="match"><small>상극 빌런</small><strong>${t.bad}</strong><p class="result-one" style="text-align:left;font-size:14px;margin-top:8px">${t.badText}</p></div>
+        </div>
+        ${capture ? "" : `
+          <div class="action-row">
+            <button class="primary" onclick="copyResult('${key}')">결과 문구 복사</button>
+            <button class="secondary" onclick="renderHome()">다시 하기</button>
+          </div>
+        `}
+      </div>
+    </section>
   `;
 }
 
 function showResult(key) {
-  const t = villainTypes[key];
-  renderShell(`
-    <section class="result" id="captureTarget" style="--c1:${t.color}; --c2:${t.color2}; --glow:${t.glow}">
-      <div class="result-hero screen-card">
-        <div class="top-actions result-actions no-capture">
-          <button class="round-btn" onclick="renderHome()">←</button>
-          <button class="share-pill" onclick="captureResult()">📸 저장</button>
-        </div>
-        <div class="result-title">
-          <p>나는 어떤 ${t.emoji}</p>
-          <h1>${t.name}</h1>
-          <span>${t.badge}</span>
-        </div>
-        <div class="poster-card">
-          <div class="ink one"></div><div class="ink two"></div>
-          <div class="speech one">${t.quote}</div>
-          <div class="speech two">위험도 ${t.danger}%</div>
-          ${villainFace(key)}
-          <div class="poster-copy">
-            <h2>${t.title}</h2>
-            <p>${t.roast}</p>
-          </div>
-        </div>
-        <div class="chips">
-          ${t.keywords.map((word) => `<span>#${word}</span>`).join("")}
-        </div>
-      </div>
-
-      <div class="result-grid">
-        <div class="paper-card lines">
-          <h3>주로 하는 말 TOP3</h3>
-          <ol>${t.catchphrases.map((text) => `<li>${text}</li>`).join("")}</ol>
-        </div>
-        <div class="paper-card tape">
-          <h3>주요 행동 패턴</h3>
-          <ul>${t.pattern.map((text) => `<li>${text}</li>`).join("")}</ul>
-        </div>
-      </div>
-
-      <div class="match-wrap">
-        ${matchCard("환장궁합", t.good, t.goodRate, "good")}
-        ${matchCard("상극주의", t.bad, t.badRate, "bad")}
-      </div>
-
-      <div class="power-card screen-card">
-        <h3>😈 빌런 능력치</h3>
-        ${statRows(t.stats)}
-      </div>
-
-      <div class="passive-card screen-card">
-        <h3>빌런 패시브 스킬</h3>
-        ${t.passive.map((text) => {
-          const [skill, desc] = text.split(": ");
-          return `<div class="passive-item"><b>${skill}</b><span>${desc}</span></div>`;
-        }).join("")}
-      </div>
-
-      <div class="bottom-actions no-capture">
-        <button class="secondary" onclick="renderHome()">↻ 다시 하기</button>
-        <button class="primary" onclick="copyShareText('${key}')">내 빌런 자랑하기</button>
-      </div>
-    </section>
-  `, "result-bg");
+  const t = types[key];
+  document.documentElement.style.setProperty("--accent", t.color);
+  document.documentElement.style.setProperty("--accent-2", t.soft);
+  shell(resultHTML(key));
 }
 
-async function captureResult() {
-  const target = document.querySelector("#captureTarget");
-  const buttons = document.querySelectorAll(".no-capture");
-  buttons.forEach((el) => el.classList.add("hide-for-capture"));
-
-  try {
-    if (!window.html2canvas) throw new Error("html2canvas not loaded");
-    const canvas = await window.html2canvas(target, {
-      backgroundColor: null,
-      scale: Math.min(window.devicePixelRatio || 2, 3),
-      useCORS: true
-    });
-    const link = document.createElement("a");
-    link.download = "office-villain-result.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  } catch (error) {
-    alert("저장 버튼이 안 먹으면 화면 캡쳐로 박제하세요. 이 UI는 캡쳐빨 받게 만들었습니다.");
-  } finally {
-    buttons.forEach((el) => el.classList.remove("hide-for-capture"));
-  }
-}
-
-async function copyShareText(key) {
-  const t = villainTypes[key];
-  const text = `나는 ${t.name} ${t.emoji}\n${t.quote}\n위험도 ${t.danger}% 나옴. 반박은 단톡방에서 받음.`;
+async function copyResult(key) {
+  const t = types[key];
+  const text = `나는 ${t.name} ${t.emoji}\n“${t.quote}”\n${t.one}\n\n너도 해봐: 오피스 빌런 테스트`;
   try {
     await navigator.clipboard.writeText(text);
-    alert("공유 멘트 복사 완료. 이제 단톡방에 투척하세요 💣");
-  } catch (error) {
-    alert(text);
+    showToast("복사 완료. 단톡방에 던져.");
+  } catch (e) {
+    showToast("복사가 막혔어. 화면 캡쳐 ㄱㄱ");
   }
+}
+
+function showToast(text) {
+  const toast = document.querySelector("#toast");
+  if (!toast) return;
+  toast.textContent = text;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 1800);
 }
 
 window.startTest = startTest;
 window.answer = answer;
 window.showResult = showResult;
 window.renderHome = renderHome;
-window.captureResult = captureResult;
-window.copyShareText = copyShareText;
+window.copyResult = copyResult;
 
+resetScores();
 renderHome();

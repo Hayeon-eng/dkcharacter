@@ -1,0 +1,9 @@
+{
+  "name": "office-villain-test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('static site - no build needed')\"",
+    "start": "node -e \"console.log('Open index.html or deploy as a static site')\""
+  }
+}

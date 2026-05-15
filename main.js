@@ -1,341 +1,325 @@
-const axes = ["impulse","plan","loud","ghost","detail","rough","idea","stable","social","solo","food","party"];
-const scores = Object.fromEntries(axes.map(a => [a, 0]));
-let current = 0;
+const axes = ["impulse","planning","talk","silent","detail","launch","idea","stable","social","solo"];
+const axisNames = {
+  impulse:"즉흥", planning:"계획", talk:"말 많음", silent:"잠수", detail:"검수", launch:"일단함", idea:"아이디어", stable:"안정", social:"사회성", solo:"혼자함"
+};
+const state = { index:0, scores:Object.fromEntries(axes.map(a=>[a,0])), answers:[] };
 
-const types = {
-  bomb: {
-    name:"퇴근직전폭탄러", short:"폭탄러", icon:"💣", color:"#B8E986", pale:"#F0FFE2", prop1:"💣", prop2:"👜",
-    quote:"아 맞다, 이것도 가능할 듯?",
-    desc:"남들 퇴근 각 잡을 때 갑자기 뇌가 개밤티로 켜지는 타입. 아이디어는 꽤 괜찮은데 타이밍이 사회적 재난임.",
-    tags:["#퇴근10분전", "#아이디어투척", "#야르이거맞냐"],
-    why:["아이디어 점수가 높고 참는 힘이 낮음","좋은 생각이 나면 내일보다 지금이 편함","본인은 공유라고 생각하지만 동기들은 노트북을 다시 엶"],
-    chat:["💬 ‘급한 건 아닌데’라고 시작하면 보통 급함","💬 오후 6:43에 ‘잠깐만’ 금지어 지정됨","💬 듣다 보면 맞말이라 더 킹받음"],
-    lunch:["🍚 메뉴 고를 때도 갑자기 숨은 맛집 던짐","☕ 커피 사러 가는 길에 새 프로젝트 아이디어 냄"],
-    party:["🍻 회식 2차 가는 길에 회사 개선안 발표함","🎤 분위기 뜨면 갑자기 옆팀이랑 친해짐"],
-    good:"마감직전각성러", bad:"체크리스트수호자"
+const villains = {
+  bomb:{
+    name:"퇴근직전폭탄러", hash:"#급한건아닌데빌런", color:"#B8E986", mascot:"hamster", prop:"note bomb", quote:"급한 건 아닌데… 이거 하나만 더 가능할 듯?", desc:"남들 가방 드는 순간 뇌가 켜짐. 아이디어는 좋은데 타이밍이 범죄에 가까움.",
+    traits:["퇴근 10분 전에 갑자기 말문이 트임","본인은 ‘도움’이라고 생각함","동기들은 조용히 노트북을 다시 엶","근데 또 들어보면 맞말이라 더 킹받음"],
+    chats:["💬 급한 건 아닌데", "💬 지금 말 안 하면 까먹을 듯", "💬 5분이면 될 것 같아요"],
+    lunch:["밥 먹다가도 ‘아 맞다’ 하고 업무 얘기 꺼냄","메뉴보다 갑자기 떠오른 수정안이 더 중요함"],
+    dinner:["1차는 얌전한데 술 들어가면 회사 개선안 발표함","2차 가면 프로젝트 시즌2 열림"],
+    good:"마감직전각성러", bad:"체크리스트수호자", formula:{impulse:2,talk:2,idea:2,launch:1}
   },
-  ghost: {
-    name:"읽씹잠수요정", short:"잠수요정", icon:"👻", color:"#A9D7FF", pale:"#EAF6FF", prop1:"📱", prop2:"…",
-    quote:"아 나 답한 줄 알았어.",
-    desc:"읽음 표시는 남기고 존재감은 사라지는 타입. 악의는 없는데 동기들이 찾다가 인류애를 잃음.",
-    tags:["#읽고내면화", "#답장상상완료", "#잠수야르"],
-    why:["메신저보다 머릿속 회의가 빠름","답장 타이밍을 놓치면 그대로 증발함","급하면 귀신같이 나타나는 편"],
-    chat:["💬 ‘헉 지금 봤어요’의 인간화","💬 단톡방에서는 조용한데 회의에서 갑자기 다 봤다고 함","💬 알림 128개부터는 그냥 자연재해"],
-    lunch:["🍚 ‘아무거나 ㄱ’ 해놓고 조용히 후보 탈락시킴","🥤 커피 주문 받을 때만 반응 속도 빨라짐"],
-    party:["🍻 2차 얘기 나오면 배터리 1% 표정","🫥 사진 찍을 때 묘하게 프레임 밖에 있음"],
-    good:"말랑조율러", bad:"회의증식마법사"
+  ghost:{
+    name:"읽씹잠수요정", hash:"#헉지금봤어요빌런", color:"#A9D7FF", mascot:"ghosty", prop:"phone", quote:"아 나 답한 줄 알았어.", desc:"읽음은 남기고 존재감은 지움. 악의는 없는데 주변 사람이 사람 찾기 게임을 하게 됨.",
+    traits:["머릿속으로는 이미 답장 세 번 함","급하면 갑자기 나타남","단톡방에서는 조용한데 회의 때 ‘그거 봤는데’ 함","알림에 묻혔다는 말이 거의 자동완성"],
+    chats:["💬 헉 지금 봤어요", "💬 알림에 묻혔어요 ㅠ", "💬 아 그거 진행되고 있었어요?"],
+    lunch:["점심 메뉴 투표는 안 했는데 막상 따라감","‘아무거나’라고 하고 진짜 아무거나 먹음"],
+    dinner:["2차 얘기 나오면 조용히 사라짐","다음날 ‘어제 재밌었어요?’라고 물어봄"],
+    good:"혼자다해버림햄스터", bad:"회의증식문어", formula:{silent:2,stable:1,solo:1,planning:1}
   },
-  checklist: {
-    name:"체크리스트수호자", short:"체크수호자", icon:"🧾", color:"#FFE08A", pale:"#FFF7D9", prop1:"✅", prop2:"🔍",
-    quote:"잠깐만, 이거 하나만 더 확인하고.",
-    desc:"최종본을 믿지 않는 오피스 검수 요괴. 덕분에 사고는 막는데 사람도 같이 막음.",
-    tags:["#진짜최종안믿음", "#1픽셀탐지", "#개밤티검수"],
-    why:["디테일 축이 압도적으로 높음","파일명에 final 붙어도 의심함","불안해서 확인하는 게 아니라 보여서 확인함"],
-    chat:["💬 ‘혹시 여기만 다시 볼 수 있을까요?’ = 17곳 있음","💬 오탈자 발견하면 눈빛 바뀜","💬 야르... 이거 그대로 나가면 우리 끝남"],
-    lunch:["🍚 메뉴판도 리뷰 별점 낮은 순으로 봄","🥢 주문 누락을 제일 먼저 감지함"],
-    party:["🍻 회식 예약 시간/인원/룸 여부 다 확인함","📸 단체사진에서 눈 감은 사람 찾아냄"],
-    good:"일단보내고수정러", bad:"퇴근직전폭탄러"
+  checklist:{
+    name:"체크리스트수호자", hash:"#진짜최종의심빌런", color:"#FFE18D", mascot:"rabbit angry", prop:"clip", quote:"잠깐만, 이거 하나만 더 확인하고.", desc:"오탈자와 어긋난 정렬을 보면 심장이 반응함. 사고는 막는데 사람도 같이 멈춤.",
+    traits:["최종본을 믿지 않음","파일명에 ‘진짜최종’ 붙으면 더 의심함","덕분에 큰일은 안 나는데 마감이 울음","본인 눈에는 1px도 보임"],
+    chats:["💬 혹시 이 부분만 다시 볼 수 있을까요?", "💬 오탈자 하나 있어요", "💬 진짜 마지막 확인입니다"],
+    lunch:["식당 리뷰 별점 낮으면 못 감","메뉴판 오타도 발견함"],
+    dinner:["예약 시간, 인원, 장소 다 다시 확인함","덕분에 회식은 안 망함. 대신 본인이 지침"],
+    good:"일단보내고수정러", bad:"퇴근직전폭탄러", formula:{detail:2,planning:2,stable:1}
   },
-  send: {
-    name:"일단보내고수정러", short:"수정러", icon:"🚀", color:"#FFB199", pale:"#FFF0EA", prop1:"🚀", prop2:"✏️",
-    quote:"보냈는데 수정 가능하죠?",
-    desc:"속도는 진짜 빠른데 주변에 백업 인력이 필요함. 보내고 나서 생각이 선명해지는 실전형 빌런.",
-    tags:["#선발송후사고", "#빠르긴함", "#수정가능하죠"],
-    why:["즉흥/실행 점수가 높고 과검수 점수가 낮음","완벽보다 일단 굴러가는 걸 선호함","본인은 빠르다고 생각함. 맞음. 문제는 빠르기만 할 때가 있음"],
-    chat:["💬 ‘일단 공유드려요’ 뒤에 수정 댓글 8개","💬 첨부파일 빠뜨리고 3초 뒤 재전송","💬 개빠른데 개불안함"],
-    lunch:["🍚 메뉴 정하기 전에 이미 주문 화면 들어감","🧃 ‘걍 여기 ㄱ?’ 하고 예약까지 함"],
-    party:["🍻 회식 장소도 일단 잡고 봄","🎲 게임 룰 설명 전에 시작 버튼 누름"],
-    good:"체크리스트수호자", bad:"읽씹잠수요정"
+  send:{
+    name:"일단보내고수정러", hash:"#보냈는데수정가능하죠빌런", color:"#FFC3A0", mascot:"hamster", prop:"laptop", quote:"일단 올려봤습니다. 수정 가능하죠?", desc:"실행력은 빠른데 주변 백업이 필요함. 보내고 나서야 생각이 선명해지는 타입.",
+    traits:["초안 공유가 빠름. 너무 빠름","수정 요청에도 멘탈이 좋음","완성도보다 흐름을 먼저 만듦","가끔 덕분에 일이 굴러가긴 함"],
+    chats:["💬 일단 공유드립니다", "💬 보시고 편하게 의견 주세요", "💬 아 그 부분 바로 수정할게요"],
+    lunch:["메뉴 정하기 전에 이미 주문 버튼 누름","실패해도 ‘다음에 안 먹으면 됨’"],
+    dinner:["회식 장소도 빠르게 예약함","근데 날짜를 한 번 더 봐야 함"],
+    good:"체크리스트수호자", bad:"메모장전략가", formula:{launch:2,impulse:2,talk:1,detail:-1}
   },
-  meeting: {
-    name:"회의증식마법사", short:"회의마법사", icon:"🐙", color:"#FFC47A", pale:"#FFF1D9", prop1:"📅", prop2:"☕",
-    quote:"그럼 이건 따로 싱크 한 번 할까요?",
-    desc:"회의를 줄이기 위한 회의를 만드는 타입. 말은 정리되는데 캘린더가 조용히 울고 있음.",
-    tags:["#싱크한번", "#캘린더폭식", "#회의야르"],
-    why:["계획/커뮤니케이션 점수가 높음","정리가 안 된 상태를 견디기 힘듦","회의 끝나면 다음 회의가 자연 번식함"],
-    chat:["💬 ‘15분만’ = 42분","💬 논의용/정리용/팔로업용 미팅을 구분함","💬 동기 점심시간을 은근히 위협함"],
-    lunch:["🍚 점심도 후보 취합 후 투표 열고 싶어함","📍 네이버지도 공유가 빠름"],
-    party:["🍻 회식 참석 여부 표 만들 가능성 있음","🧑‍💼 술자리에서도 안건 정리함"],
-    good:"읽씹잠수요정", bad:"일단보내고수정러"
+  meeting:{
+    name:"회의증식문어", hash:"#싱크한번할까요빌런", color:"#C7B7FF", mascot:"octo", prop:"cup", quote:"이건 따로 싱크 한 번 할까요?", desc:"회의를 줄이기 위한 회의를 잡음. 말은 정리되는데 캘린더가 울고 있음.",
+    traits:["15분 얘기가 다음 회의 3개를 낳음","회의록은 잘 씀","일단 사람들을 모아야 마음이 편함","동기들의 점심시간을 조용히 위협함"],
+    chats:["💬 이거 짧게 싱크 가능하세요?", "💬 10분만 잡을게요", "💬 회의록 공유드립니다"],
+    lunch:["점심 메뉴도 후보군 만들고 투표 올림","결국 제일 가까운 곳 감"],
+    dinner:["회식 자리 배치까지 은근 신경 씀","2차 갈지 말지도 투표로 정함"],
+    good:"말랑조율펭귄", bad:"읽씹잠수요정", formula:{talk:2,planning:2,social:1,stable:1}
   },
-  tool: {
-    name:"새툴전도사", short:"툴전도사", icon:"🧪", color:"#BFF4EA", pale:"#E9FFFA", prop1:"🧪", prop2:"💻",
-    quote:"님들 이거 써봄? 생산성 미침.",
-    desc:"새로운 툴, AI, 자동화 보면 눈빛이 바뀜. 3일 뒤 본인도 안 쓸 때가 있지만 가끔 진짜 보물을 물어옴.",
-    tags:["#이거써봄", "#생산성미침", "#야르자동화"],
-    why:["아이디어/실험 점수가 높음","기존 방식에 금방 답답해함","새로운 버튼을 못 참고 누름"],
-    chat:["💬 ‘이걸로 하면 5분 컷’이라고 함. 세팅은 2시간","💬 링크 공유 속도 ㄹㅈㄷ","💬 무료 플랜 한도 다 쓰고 조용해짐"],
-    lunch:["🍚 맛집 앱/지도 리스트 새로 파옴","🥤 키오스크 신기능 발견하면 꼭 눌러봄"],
-    party:["🍻 회식 정산 자동화 만들겠다고 함","📱 랜덤 게임 앱 깔자고 함"],
-    good:"퇴근직전폭탄러", bad:"체크리스트수호자"
+  tool:{
+    name:"새툴전도사", hash:"#이AI써봄빌런", color:"#BFF4EA", mascot:"otter", prop:"laptop", quote:"님들 이거 쓰면 생산성 미쳤는데요?", desc:"새 서비스 보면 눈빛이 바뀜. 3일 뒤 본인도 까먹지만 가끔 진짜 보물을 물어옴.",
+    traits:["노션, 피그마, AI, 자동화 다 건드림","세팅할 때 제일 신남","정착률은 낮지만 발견력은 높음","‘이거 무료래요’에 약함"],
+    chats:["💬 이 툴 써봄?", "💬 자동화 가능할 듯", "💬 제가 테스트해봤는데요"],
+    lunch:["새로 생긴 식당 먼저 가보고 싶어함","실패해도 경험치라고 함"],
+    dinner:["회식 장소도 요즘 뜨는 데 찾음","예약 앱 새 기능 설명하다가 아무도 안 들음"],
+    good:"퇴근직전폭탄러", bad:"체크리스트수호자", formula:{idea:2,impulse:1,launch:1,detail:-1}
   },
-  hamster: {
-    name:"혼자다해버림햄스터", short:"햄스터", icon:"🐹", color:"#F7C7A3", pale:"#FFF0E4", prop1:"📦", prop2:"🐹",
-    quote:"그냥 제가 해놨어요.",
-    desc:"작고 귀여운데 갑자기 결과물을 물고 오는 타입. 능력은 있는데 과정 공유가 실종돼서 동기들이 고마우면서도 살짝 소외됨.",
-    tags:["#혼자처리", "#답답하면직접", "#햄찌빌런"],
-    why:["솔로/실행 점수가 높음","기다리느니 직접 하는 게 마음 편함","공유보다 완성을 먼저 해버림"],
-    chat:["💬 조용하다가 ‘완료했습니다’ 한 줄 남김","💬 중간 과정 물어보면 이미 끝나 있음","💬 개고마운데 개무서움"],
-    lunch:["🍚 모두 메뉴 고민할 때 이미 결제하고 옴","🥡 혼밥도 타격 없음"],
-    party:["🍻 회식 예약도 말없이 해둘 수 있음","🧥 사라진 줄 알았는데 계산하고 옴"],
-    good:"말랑조율러", bad:"회의증식마법사"
+  hamster:{
+    name:"혼자다해버림햄스터", hash:"#그냥제가했어요빌런", color:"#FFD6E8", mascot:"hamster", prop:"bag", quote:"그냥 제가 해놨어요.", desc:"답답하면 직접 해버림. 결과물은 나왔는데 과정은 실종돼서 동기들이 감사하면서도 약간 무서워함.",
+    traits:["공유 전에 이미 끝내놓음","일은 빠른데 흔적이 없음","도와달라는 말보다 직접 하는 게 빠름","번아웃 오기 전까지 아무도 모름"],
+    chats:["💬 제가 처리해둘게요", "💬 일단 해놨어요", "💬 공유가 늦었네요"],
+    lunch:["메뉴 안 정해지면 조용히 예약함","계산도 어느새 해놓고 있음"],
+    dinner:["뒤에서 조용히 챙기는 타입","택시 잡고 길 찾고 다 함"],
+    good:"읽씹잠수요정", bad:"회의증식문어", formula:{solo:2,launch:1,stable:1,silent:1}
   },
-  face: {
-    name:"표정관리실패러", short:"표정러", icon:"🧊", color:"#CDBBFF", pale:"#F2EEFF", prop1:"😐", prop2:"🫠",
-    quote:"아니 괜찮아요.  얼굴: 안 괜찮음.",
-    desc:"말은 둥글게 하는데 얼굴이 네모난 타입. 사회생활은 하는데 광대와 눈썹이 퇴사서를 냄.",
-    tags:["#얼굴이말함", "#안괜찮음", "#개티남"],
-    why:["감정 반응은 빠른데 포장이 느림","불편함을 숨기려 하지만 얼굴이 먼저 제출함","동기들이 표정 보고 회의 분위기를 읽음"],
-    chat:["💬 ‘넵 좋아요’ 뒤에 묘한 정적","💬 이모티콘은 웃는데 본인은 안 웃음","💬 야르 표정으로 이미 반대함"],
-    lunch:["🍚 싫은 메뉴 나오면 0.5초 굳음","🥗 ‘괜찮아요’ 하고 젓가락 속도 느려짐"],
-    party:["🍻 2차 얘기 나오면 얼굴에서 와이파이 끊김","📸 단체사진에서 영혼 반쯤 없음"],
-    good:"읽씹잠수요정", bad:"퇴근직전폭탄러"
+  face:{
+    name:"표정관리실패러", hash:"#얼굴이퇴사함빌런", color:"#D9E2FF", mascot:"ice", prop:"phone", quote:"아니 괜찮아요. 진짜 괜찮아요.", desc:"말은 둥글게 하는데 얼굴이 네모남. 회의실에서 표정으로 이미 의견 제출 완료.",
+    traits:["괜찮다고 하는데 안 괜찮음","카메라 꺼도 분위기가 느껴짐","입보다 눈썹이 먼저 말함","동기들이 눈치 보다가 슬랙이 조용해짐"],
+    chats:["💬 네 괜찮습니다", "💬 저는 좋아요", "💬 ...", "💬 아뇨 진짜 괜찮아요"],
+    lunch:["‘아무거나’라고 했지만 표정은 이미 메뉴 평가 중","맛없으면 조용해짐"],
+    dinner:["회식 중 사회생활 미소 유지","집 가는 길에 동기한테만 진심 토크함"],
+    good:"말랑조율펭귄", bad:"퇴근직전폭탄러", formula:{silent:1,detail:1,stable:1,social:-1}
   },
-  mood: {
-    name:"말랑조율러", short:"조율러", icon:"🧸", color:"#FFC7E8", pale:"#FFF0F8", prop1:"🧸", prop2:"💬",
-    quote:"얘들아 싸우지 말고 일단 밥부터 먹자.",
-    desc:"동기들 사이 공기청정기 같은 타입. 근데 다들 기대다 보면 본인만 조용히 방전됨.",
-    tags:["#분위기관리", "#말랑방패", "#동기보호자"],
-    why:["관계/안정 점수가 높음","일보다 사람 기분을 먼저 감지함","갈등 상황에서 자동으로 쿠션어가 나옴"],
-    chat:["💬 ‘둘 다 맞는 말인 것 같아’ 장인","💬 단톡방 싸해지면 이모지로 응급처치","💬 본인 멘탈은 셀프 방치"],
-    lunch:["🍚 메뉴 갈리면 중간 지점 찾음","🥹 ‘난 진짜 아무거나 괜찮아’가 진짜일 때도 있음"],
-    party:["🍻 술 못 마시는 사람 챙김","🚕 택시 타는 것까지 확인하고 집 감"],
-    good:"혼자다해버림햄스터", bad:"회의증식마법사"
+  planner:{
+    name:"메모장전략가", hash:"#세계관만유니콘빌런", color:"#CDEBFF", mascot:"rabbit", prop:"clip", quote:"큰 그림은 이렇거든요.", desc:"머릿속에는 이미 시즌3까지 있음. 시작은 느린데 듣다 보면 이상하게 설득됨.",
+    traits:["맥락 설명하다가 세계관이 열림","시작 전 구조가 먼저 필요함","아이디어가 작게 시작하지 않음","정리되면 꽤 강력함"],
+    chats:["💬 일단 배경부터 설명드리면", "💬 이게 결국은 구조 문제라", "💬 제가 한 번 정리해볼게요"],
+    lunch:["식당 하나 고르는데 동선과 분위기까지 봄","결정은 느리지만 실패율 낮음"],
+    dinner:["술 들어가면 회사 비전 얘기함","다들 웃다가 갑자기 납득함"],
+    good:"새툴전도사", bad:"일단보내고수정러", formula:{planning:2,idea:1,detail:1,launch:-1}
   },
-  late: {
-    name:"마감직전각성러", short:"각성러", icon:"🔥", color:"#FF9EB5", pale:"#FFF0F3", prop1:"🔥", prop2:"⏰",
-    quote:"와 지금 개잘됨. 왜 이제 됨?",
-    desc:"평소엔 저전력 모드인데 마감이 코앞에 오면 갑자기 인간 터보가 됨. 결과는 나오는데 주변 심장이 먼저 나감.",
-    tags:["#마감버프", "#벼락치기장인", "#ㄹㅈㄷ각성"],
-    why:["즉흥/압박 실행 점수가 높음","시간이 많으면 오히려 집중이 흐려짐","마감 알림이 도핑제 역할을 함"],
-    chat:["💬 오후엔 조용하다가 밤에 파일 12개 보냄","💬 ‘이제 감 잡음’이 마감 40분 전","💬 동기들 심박수로 진행률 측정 가능"],
-    lunch:["🍚 점심 직전까지 미루다가 5분 만에 결정","☕ 커피 들어가면 갑자기 살아남"],
-    party:["🍻 회식 전까지 일 끝내겠다고 하고 진짜 끝냄","🕺 끝나면 텐션 과하게 올라옴"],
-    good:"퇴근직전폭탄러", bad:"체크리스트수호자"
+  penguin:{
+    name:"말랑조율펭귄", hash:"#다들맞말이에요빌런", color:"#BDE7D9", mascot:"penguin", prop:"cup", quote:"아 근데 둘 다 맞는 말 같아요.", desc:"사람 사이 공기를 제일 빨리 읽음. 팀 평화는 지키는데 본인 멘탈은 조용히 닳음.",
+    traits:["싸움 나기 전에 쿠션어 뿌림","단톡방 온도 조절 담당","누구 편도 아닌데 모두를 챙김","회의 끝나고 혼자 기빨림"],
+    chats:["💬 아 근데 이것도 맞고", "💬 제가 중간안 한번 써볼게요", "💬 다들 너무 고생했어요"],
+    lunch:["메뉴 취향 다 물어보다가 본인 취향 사라짐","마지막엔 ‘저도 좋아요’"],
+    dinner:["테이블 분위기 살피느라 밥이 늦음","취한 사람 물 챙겨줌"],
+    good:"표정관리실패러", bad:"새툴전도사", formula:{social:2,stable:2,talk:1,solo:-1}
   }
 };
 
 const questions = [
-  {scene:"💬 메신저", q:"동기 단톡방에 갑자기 새 얘기가 떴다. 너의 반응은?", options:[
-    ["‘오 이거 개좋은데?’ 하고 바로 판 키움","지금 이 흐름 타야 함",{loud:2,idea:2,impulse:1}],
-    ["읽고 머릿속으로 답장 완료","현실 답장은 아직",{ghost:3,solo:1}],
-    ["‘잠깐 정리하면…’ 하고 구조 잡음","혼돈 못 참음",{plan:2,stable:1,loud:1}],
-    ["이모지 하나로 생존 신고","말 많이 하면 일 생김",{ghost:1,social:1,stable:1}]
+  {tag:"💬 메신저", title:"퇴근 10분 전, 갑자기 생각난 게 있다.", sub:"지금 말하면 다들 가방 다시 내려놓을 수도 있음.", options:[
+    ["“아 맞다, 이것도 가능할 듯” 하고 일단 공유한다","동기들 노트북 다시 열리는 소리",{impulse:2,talk:2,idea:2}],
+    ["메모장에 적어둔다. 내일의 내가 알아서 하겠지","내일의 나: 모름",{planning:1,stable:1,silent:1}],
+    ["혼자 초안까지 만들어놓고 갑자기 던진다","놀랍게도 이미 80% 완성",{solo:2,launch:1,idea:1}],
+    ["말하려다 참는다. 근데 표정에서 다 티난다","얼굴: 지금 말하고 싶음",{silent:1,detail:1,stable:1}]
   ]},
-  {scene:"🏢 업무", q:"퇴근 17분 전, 더 좋은 아이디어가 떠올랐다.", options:[
-    ["지금 말 안 하면 까먹음. 바로 투척","미안한데 야르",{impulse:3,idea:2,loud:2}],
-    ["메모장에 적어두고 내일 말하려다 까먹음","내일의 나 미안",{plan:1,ghost:2,stable:1}],
-    ["혼자 초안까지 만들어놓고 갑자기 공유","말보다 결과",{solo:2,impulse:1,idea:1}],
-    ["참는데 표정에서 다 티남","얼굴이 먼저 발언",{stable:1,social:1,detail:1}]
+  {tag:"💬 메신저", title:"동기 단톡에 질문이 올라왔다.", sub:"‘이거 누가 알고 있어?’ 모두가 조용해지는 순간.", options:[
+    ["알면 바로 답한다. 모르면 아는 척 안 함","깔끔한 사람인 척",{talk:1,social:1,stable:1}],
+    ["읽고 ‘나중에 답해야지’ 하다가 진짜 잊는다","악의 없음. 문제도 있음",{silent:2,stable:1}],
+    ["답장 대신 자료를 찾아서 길게 보낸다","갑자기 미니 리포트",{detail:1,planning:2}],
+    ["‘제가 해볼게요’ 하고 조용히 처리한다","공유는 조금 늦음",{solo:2,launch:1}]
   ]},
-  {scene:"🍚 점심", q:"점심 메뉴 정할 때 제일 너다운 건?", options:[
-    ["‘아무거나 ㄱ’ 근데 진짜 아무거나는 싫음","국룰입니다",{ghost:1,food:2,social:1}],
-    ["저장해둔 맛집 리스트 갑자기 오픈","나만 믿어",{idea:1,loud:1,food:3}],
-    ["후보 4개 놓고 투표 열고 싶음","민주주의 점심",{plan:2,social:2,food:1}],
-    ["그냥 제일 가까운 데 가자고 함","배고픔이 우선",{rough:2,stable:1,food:1}]
+  {tag:"🧊 회의", title:"회의하다가 누가 갑자기 정색했다.", sub:"공기 온도 3도 내려감.", options:[
+    ["“아 근데 그 말도 맞긴 함…” 하고 수습한다","평화 비둘기 출근",{social:2,stable:2,talk:1}],
+    ["아무 말 안 하는데 얼굴이 이미 퇴사했다","표정이 먼저 발언",{silent:1,detail:1}],
+    ["“근데 애초에 방향 자체가…” 하고 본론을 더 세게 간다","회의 시즌2 오픈",{talk:2,idea:2,impulse:1}],
+    ["회의록 정리하면서 다음 액션을 만든다","감정은 모르겠고 액션아이템",{planning:2,detail:1,stable:1}]
   ]},
-  {scene:"📅 회의", q:"회의 중 ‘의견 있으세요?’가 나왔다.", options:[
-    ["방금 생각난 걸 7분짜리 세계관으로 확장","말하다 보니 커짐",{loud:3,idea:2}],
-    ["‘괜찮아요’ 해놓고 끝나고 DM 보냄","그땐 생각 안 났음",{ghost:2,detail:1,stable:1}],
-    ["회의록 쓰다가 다음 액션까지 박아둠","일단 정리부터",{plan:3,detail:1}],
-    ["아무 말 안 하다가 마지막에 핵심 문제 발견","늦게 보이지만 정확함",{detail:2,solo:1,stable:1}]
+  {tag:"🍚 점심", title:"점심 메뉴 정할 때 너는?", sub:"‘아무거나’라는 가장 어려운 단어가 등장했다.", options:[
+    ["“아무거나 좋아요”라고 한다. 진짜 아무거나 먹는다","희귀한 아무거나 인간",{stable:2,social:1}],
+    ["맛집 저장해둔 거 갑자기 꺼낸다","지도 앱에 진심",{idea:1,talk:1,planning:1}],
+    ["결정 안 나면 그냥 예약하거나 주문한다","배고픔이 리더십을 만듦",{launch:2,solo:1}],
+    ["리뷰, 거리, 웨이팅 다 확인한다","점심도 프로젝트처럼",{detail:2,planning:2}]
   ]},
-  {scene:"🧾 검수", q:"최종본 확인할 때 너는?", options:[
-    ["파일명에 final 붙어도 안 믿음","진짜최종_최종2",{detail:3,plan:2}],
-    ["대충 문제 없어 보이면 바로 ㄱ","완벽은 다음 생에",{rough:3,impulse:1}],
-    ["남들이 놓친 오탈자만 귀신같이 보임","눈이 피곤한 재능",{detail:3,solo:1}],
-    ["일단 보내고 피드백 받으면서 고침","실전이 답",{rough:2,impulse:2,loud:1}]
+  {tag:"🍻 회식", title:"회식 2차 얘기가 나왔다.", sub:"누군가는 눈이 빛나고 누군가는 계산서를 찾는다.", options:[
+    ["“앗 저 내일 아침 일정이…” 하고 퇴장 각을 본다","이미 집 가는 동선 검색",{silent:1,stable:2}],
+    ["갑자기 텐션 올라가서 옆팀이랑 친해진다","사회성 풀충전",{talk:2,social:2}],
+    ["조용히 있다가 술 들어가면 회사 얘기 진지하게 한다","갑자기 프로세스 개편",{idea:2,talk:1}],
+    ["취한 사람 챙기고 택시까지 확인한다","회식 안전요원",{social:2,stable:1,detail:1}]
   ]},
-  {scene:"💬 메신저", q:"답장이 늦어진 진짜 이유는?", options:[
-    ["읽고 답한 줄 알았다","머릿속 전송 완료",{ghost:3}],
-    ["뭐라고 답할지 고민하다가 하루 지남","신중한 잠수",{ghost:2,detail:1,stable:1}],
-    ["지금 답하면 일이 생길 것 같았다","생존 전략",{ghost:2,stable:2}],
-    ["알림이 너무 많아서 사회가 무너졌다","개밤티 알림지옥",{rough:1,ghost:1,loud:1}]
+  {tag:"📎 업무", title:"초안 공유 타이밍은?", sub:"완벽과 속도 사이에서 늘 갈림.", options:[
+    ["70%쯤 됐을 때 공유한다. 피드백 받으면서 고침","속도는 생명",{launch:2,talk:1}],
+    ["95%는 돼야 마음이 편하다","최종본도 아직 불안",{detail:2,planning:1}],
+    ["혼자 거의 끝내고 ‘이렇게 했어요’ 한다","과정은 증발",{solo:2,launch:1}],
+    ["방향부터 맞춘 뒤 시작한다","시작 전에 지도부터",{planning:2,stable:1}]
   ]},
-  {scene:"🍻 회식", q:"회식 자리에서 너의 기본 모드는?", options:[
-    ["초반엔 조용한데 갑자기 텐션 올라감","예열형 광기",{party:2,loud:2,impulse:1}],
-    ["2차 얘기 나오면 배터리 1%","집이 최고",{party:-1,ghost:2,stable:1}],
-    ["술 들어가면 회사 개선안 발표","왜 여기서요",{loud:2,idea:2,party:2}],
-    ["끝까지 사람들 택시 타는 것까지 챙김","동기 보호자",{social:3,stable:1,party:1}]
+  {tag:"💬 메신저", title:"슬랙 답장이 늦어지는 이유는?", sub:"읽음과 답장은 별개의 세계다.", options:[
+    ["읽고 답한 줄 알았다","진짜 그렇게 믿고 있음",{silent:2}],
+    ["뭐라고 답할지 고민하다가 시간이 지났다","신중함과 방치 사이",{planning:1,silent:1,detail:1}],
+    ["바로 답하면 일이 생길 것 같아서 잠깐 멈췄다","현명한 생존 본능",{stable:2,silent:1}],
+    ["답장 대신 결과물을 들고 온다","말보다 파일",{solo:2,launch:1}]
   ]},
-  {scene:"🧪 새 툴", q:"누가 새 협업툴 링크를 보냈다.", options:[
-    ["바로 가입하고 기능 다 눌러봄","버튼 못 참음",{idea:3,impulse:2}],
-    ["‘이걸 왜 또…’ 하면서 기존 방식 지킴","변경 피로도 MAX",{stable:2,plan:1}],
-    ["장단점 표 만들어서 비교함","툴도 검증 대상",{plan:2,detail:1}],
-    ["일단 좋아 보인다고 단톡에 전파","생산성 미침",{loud:2,idea:2,social:1}]
+  {tag:"🧃 동기방", title:"동기들이 ‘오늘 힘들다’고 할 때", sub:"공감, 해결, 회피 중 하나는 튀어나옴.", options:[
+    ["“ㅇㅈ 오늘 좀 에바” 하고 같이 눕는다","공감형 동지",{social:2,stable:1}],
+    ["왜 힘든지 원인을 분석하기 시작한다","위로가 보고서가 됨",{planning:2,detail:1}],
+    ["웃긴 짤 하나 보낸다","분위기 응급처치",{talk:1,social:1,impulse:1}],
+    ["말은 안 하지만 간식 링크를 보낸다","조용한 케어",{silent:1,social:1,stable:1}]
   ]},
-  {scene:"🔥 마감", q:"마감 1시간 전 너의 상태는?", options:[
-    ["갑자기 생산성 400%","지금 개잘됨",{impulse:2,rough:1,idea:1}],
-    ["이제야 큰 그림이 보임","늦었지만 선명함",{idea:2,impulse:1}],
-    ["하나만 더 확인하다가 시간 녹음","검수 블랙홀",{detail:3,plan:1}],
-    ["주변 사람 일정까지 조율 중","내 일도 바쁜데",{social:2,plan:1,stable:1}]
+  {tag:"🔥 마감", title:"마감 1시간 전 너는?", sub:"이때부터 진짜 성격 나옴.", options:[
+    ["갑자기 집중력 미쳐서 속도 붙는다","왜 이제 켜짐",{launch:2,impulse:1}],
+    ["마지막 검수하다가 끝이 안 난다","수정의 늪",{detail:2,planning:1}],
+    ["문제 생기면 바로 사람 불러 모은다","긴급 싱크 ON",{talk:2,social:1}],
+    ["조용히 다 처리하고 공유한다","뒤에서 불탐",{solo:2,stable:1}]
   ]},
-  {scene:"☕ 커피", q:"동기들이 커피 사러 간다. 너는?", options:[
-    ["‘나도!’ 하고 메뉴는 3분 뒤 보냄","메뉴판과 내적갈등",{ghost:1,food:1}],
-    ["새 카페 추천하면서 루트까지 바꿈","갑분탐험",{idea:2,loud:1,food:2}],
-    ["주문 취합해서 깔끔하게 정리","카페 PM",{plan:2,social:2,food:1}],
-    ["자리 지킨다 하고 일하다가 늦게 후회","나도 갈걸",{solo:2,stable:1}]
+  {tag:"🧊 회의", title:"회의가 끝나가는데 결론이 없다.", sub:"다들 노트북 닫을 타이밍만 보고 있음.", options:[
+    ["“그럼 제가 정리해서 공유할게요” 한다","또 내가 하네",{solo:1,planning:2}],
+    ["“한 번만 더 얘기해보죠” 한다","회의 생명 연장",{talk:2,planning:1}],
+    ["“일단 해보고 판단하죠” 한다","생각보다 행동파",{launch:2,impulse:1}],
+    ["조용히 있다가 끝나고 DM으로 의견 보낸다","회의 후 등장",{silent:2,detail:1}]
   ]},
-  {scene:"📎 자료", q:"자료 공유할 때 제일 가까운 모습은?", options:[
-    ["정리 덜 됐지만 일단 공유","필요하면 보겠지",{rough:2,impulse:2}],
-    ["폴더/파일명/버전까지 정리 후 공유","깔끔해야 마음 편함",{plan:2,detail:2}],
-    ["혼자 만들어놓고 나중에 ‘여기 있어요’","언제 했냐",{solo:3,detail:1}],
-    ["공유하면서 사용법까지 설명","친절한데 김",{loud:1,social:2,plan:1}]
+  {tag:"📱 단톡", title:"동기방에 갑자기 회사 얘기가 시작됐다.", sub:"퇴근 후에도 회사는 따라온다.", options:[
+    ["읽다가 조용히 사라진다","내 시간 지키기",{silent:2,stable:1}],
+    ["“근데 그거 진짜 문제긴 함” 하고 불붙인다","퇴근 후 토론회",{talk:2,idea:1}],
+    ["팩트 정리해서 보낸다","감정 사이에 엑셀",{detail:1,planning:2}],
+    ["웃긴 말로 방향을 바꾼다","살기 위한 드립",{social:2,impulse:1}]
   ]},
-  {scene:"🫠 분위기", q:"회의실 공기가 갑자기 싸해졌다.", options:[
-    ["바로 농담 하나 던져서 살림","사회적 CPR",{social:2,loud:1}],
-    ["아무 말 안 하지만 얼굴이 다 말함","표정 제출",{ghost:1,detail:1}],
-    ["양쪽 말 정리해서 중재함","말랑 방패",{social:3,stable:2}],
-    ["싸한 이유를 분석하기 시작","상황도 디버깅",{plan:1,detail:2}]
+  {tag:"🍚 점심", title:"밥 먹는 중 업무 얘기가 나왔다.", sub:"숟가락이 멈추는 순간.", options:[
+    ["“밥 먹을 땐 밥 얘기하자” 모드","생존권 주장",{stable:2,silent:1}],
+    ["듣다가 갑자기 좋은 아이디어를 낸다","밥상 기획자",{idea:2,impulse:1,talk:1}],
+    ["문제 해결 방법을 적기 시작한다","국밥 옆 액션아이템",{planning:2,detail:1}],
+    ["조용히 듣다가 나중에 혼자 처리한다","밥 먹을 땐 조용히",{solo:2,silent:1}]
   ]},
-  {scene:"📱 단톡", q:"단톡방에서 가장 자주 하는 말은?", options:[
-    ["‘야 이거 개좋은데?’","일단 신남",{loud:2,idea:2}],
-    ["‘헉 지금 봄 ㅠ’","진짜일 수도",{ghost:3}],
-    ["‘혹시 이 부분만 다시 확인 가능?’","이 부분만 아님",{detail:3}],
-    ["‘일단 ㄱ?’","속도가 생명",{rough:2,impulse:2}]
+  {tag:"🧪 새것", title:"새로운 툴을 발견했다.", sub:"무료 체험 버튼이 너를 부른다.", options:[
+    ["바로 써보고 동기방에 공유한다","이거 진짜 괜찮은데?",{idea:2,impulse:1,talk:1}],
+    ["기존 방식이랑 비교해보고 결정한다","도입 전 검증",{planning:2,detail:1}],
+    ["좋아 보여도 일단 귀찮아서 나중에 본다","나중 = 미정",{stable:1,silent:1}],
+    ["혼자 자동화까지 만들어본다","조용한 실험실",{solo:1,idea:2,launch:1}]
   ]},
-  {scene:"🧑‍💻 협업", q:"남이 답답하게 일하고 있으면?", options:[
-    ["기다리다 결국 내가 함","손이 먼저 감",{solo:3,impulse:1}],
-    ["어디서 막혔는지 물어보고 같이 정리","착한데 피곤함",{social:2,plan:2}],
-    ["새 방식 제안함","이참에 바꾸자",{idea:2,loud:1}],
-    ["속으로만 답답해하다 표정으로 들킴","안 괜찮음",{ghost:1,detail:1,stable:1}]
+  {tag:"📂 파일", title:"파일명 ‘최종_진짜최종_v3’ 발견.", sub:"믿음이 흔들리는 순간.", options:[
+    ["열자마자 버전 히스토리부터 본다","불신의 시작",{detail:2,planning:1}],
+    ["일단 최신 거 같으면 쓴다","빠른 판단. 가끔 사고",{launch:2,impulse:1}],
+    ["만든 사람에게 바로 물어본다","확인은 사람에게",{talk:1,social:1}],
+    ["조용히 새로 정리해서 공유한다","질서 회복",{solo:1,detail:2}]
   ]},
-  {scene:"🍚 밥친구", q:"동기랑 밥 먹을 때 네 포지션은?", options:[
-    ["회사 썰 듣다가 리액션 장인 됨","밥보다 썰",{social:2,food:1}],
-    ["먹으면서도 업무 얘기 꺼냄","죄송한데 생각남",{loud:1,idea:1,food:1}],
-    ["메뉴 맛/가격/웨이팅 종합평가","리뷰어 빙의",{detail:2,food:2}],
-    ["밥 먹는 시간엔 조용히 충전","말 걸면 방전",{ghost:1,solo:2,stable:1}]
+  {tag:"🍻 회식", title:"회식 자리에서 갑자기 조용해졌다.", sub:"누군가 말실수한 것 같음.", options:[
+    ["급하게 다른 얘기로 돌린다","분위기 소방관",{social:2,talk:1}],
+    ["아무 말 안 하고 물만 마신다","생존 모드",{silent:2,stable:1}],
+    ["‘근데 방금 그건 좀…’ 하고 짚는다","정면 돌파",{talk:2,detail:1}],
+    ["옆사람 챙기면서 공기를 본다","눈치 레이더",{social:2,stable:1}]
   ]},
-  {scene:"📌 계획", q:"새 프로젝트 시작하면 먼저 하는 건?", options:[
-    ["일단 첫 버전 만들어봄","계획은 움직이며",{impulse:2,rough:1}],
-    ["목표/일정/담당자부터 정리","안 그러면 불안",{plan:3,stable:1}],
-    ["레퍼런스랑 새 아이디어 모음","머릿속 축제",{idea:3}],
-    ["누가 뭘 어려워할지 먼저 봄","사람 먼저",{social:2,stable:1}]
+  {tag:"🧊 회의", title:"누가 ‘의견 있으세요?’라고 물었다.", sub:"방금까지 조용했던 사람들이 눈을 피함.", options:[
+    ["짧게 말하려다 길어진다","배경 설명 추가요",{talk:2,idea:1}],
+    ["괜찮다고 했는데 끝나고 생각난다","회의 후 깨달음",{silent:1,detail:1}],
+    ["핵심만 말하고 정리한다","차분한 결론충",{planning:2,stable:1}],
+    ["‘일단 해보면 알 듯’ 한다","실행으로 도망",{launch:2,impulse:1}]
   ]},
-  {scene:"🤔 피드백", q:"피드백 받을 때 속마음은?", options:[
-    ["오케이 바로 고칠게요","수정 버튼 ON",{impulse:1,rough:1,social:1}],
-    ["왜 그런지 근거가 궁금함","납득 필요",{detail:1,plan:2}],
-    ["겉으론 웃는데 얼굴은 굳음","티남",{ghost:1,stable:1}],
-    ["이참에 방향 자체를 바꿔볼까?","스케일 커짐",{idea:2,loud:1}]
+  {tag:"💬 메신저", title:"상대가 ‘급한 건 아닌데’라고 보냈다.", sub:"대부분 급하다.", options:[
+    ["바로 본다. 불안해서 못 참음","알림 노예",{detail:1,social:1}],
+    ["진짜 급한지 먼저 판단한다","에너지 절약",{stable:2,planning:1}],
+    ["‘넵!’ 하고 받았는데 시작은 나중에 한다","답장은 빠름",{talk:1,launch:1}],
+    ["일단 처리해서 결과만 보낸다","말보다 결과",{solo:2,launch:1}]
   ]},
-  {scene:"🗂 파일", q:"네 바탕화면 상태는?", options:[
-    ["정리됨. 당연함.","파일명도 인격",{detail:2,plan:2}],
-    ["난장판인데 나는 어디 있는지 앎","나만의 우주",{rough:2,solo:1}],
-    ["새 폴더(12) 있음","괜찮아 아직",{rough:1,ghost:1}],
-    ["정리하려고 새 툴부터 찾음","본질 회피",{idea:2,plan:1}]
+  {tag:"🧃 동기방", title:"누가 실수해서 분위기가 애매하다.", sub:"놀릴지 감쌀지 판단해야 함.", options:[
+    ["가볍게 웃기고 넘어가게 해준다","살짝 살려줌",{social:2,impulse:1}],
+    ["실수 원인과 재발 방지를 정리한다","분위기보다 시스템",{planning:2,detail:1}],
+    ["조용히 도와서 티 안 나게 막는다","뒤처리 장인",{solo:2,social:1}],
+    ["괜찮다고 하는데 표정이 놀람","얼굴 로그아웃 실패",{silent:1,detail:1}]
   ]},
-  {scene:"🗣 발표", q:"갑자기 발표를 맡게 됐다.", options:[
-    ["말하다 보면 어떻게든 됨","입이 먼저 출근",{loud:2,impulse:1}],
-    ["스크립트 없으면 죽음","대본은 생명",{plan:2,detail:1}],
-    ["자료는 내가 만들고 발표는 남이 했으면","무대 뒤 선호",{solo:2,ghost:1}],
-    ["분위기 봐가며 부드럽게 말함","사회생활 장인",{social:2,stable:1}]
+  {tag:"📎 업무", title:"갑자기 ‘이거 오늘 가능?’이 왔다.", sub:"오늘은 이미 오늘인데요.", options:[
+    ["가능한 범위를 바로 쪼갠다","현실적 생존",{planning:2,stable:1}],
+    ["일단 된다고 하고 뛰어든다","미래의 나 미안",{launch:2,impulse:1}],
+    ["왜 오늘이어야 하는지 묻는다","근거 없으면 못 감",{detail:2,planning:1}],
+    ["말없이 처리하다가 늦게 공유한다","혼자 전쟁",{solo:2,silent:1}]
   ]},
-  {scene:"🍻 회식2", q:"회식에서 ‘한마디씩 하자’가 나왔다.", options:[
-    ["갑자기 진심 모드로 길어짐","TMI 오픈",{loud:2,party:2,social:1}],
-    ["짧고 안전하게 끝냄","생존형 멘트",{stable:2,ghost:1}],
-    ["웃기려고 했다가 스스로 민망","억텐 주의",{impulse:1,loud:1,party:1}],
-    ["남들 멘트 듣고 감동 받음","말랑해짐",{social:2,party:1}]
+  {tag:"🍚 점심", title:"동기가 ‘여기 맛없대’라고 했다.", sub:"이미 가는 길이었다.", options:[
+    ["바로 다른 곳 찾는다","실패 회피",{planning:1,stable:2}],
+    ["그래도 한 번 먹어보자고 한다","경험치 수집",{idea:1,impulse:1}],
+    ["리뷰를 직접 다시 확인한다","검증 없인 못 믿음",{detail:2}],
+    ["그냥 가까운 데 가자고 한다","배고픔이 우선",{launch:2,stable:1}]
   ]},
-  {scene:"🧠 아이디어", q:"새 아이디어가 별로라는 말을 들으면?", options:[
-    ["그럼 다른 버전 3개 더 냄","안 꺼짐",{idea:3,impulse:1}],
-    ["왜 별론지 구조적으로 물어봄","납득 플리즈",{plan:2,detail:1}],
-    ["괜찮다면서 하루종일 신경 씀","얼굴은 이미",{ghost:1,stable:1}],
-    ["일단 작게 테스트해보자고 함","실험으로 증명",{idea:2,rough:1}]
+  {tag:"🔥 마감", title:"마감 직전에 오류를 발견했다.", sub:"못 본 척하면 잠은 잘 수 있음.", options:[
+    ["바로 말한다. 다 같이 죽더라도 고쳐야 함","양심이 너무 큼",{detail:2,talk:1}],
+    ["영향도 보고 조용히 고친다","혼자 수습",{solo:2,detail:1}],
+    ["일단 보내고 수정 가능성부터 본다","회수 가능한가요",{launch:2,impulse:1}],
+    ["내일 고쳐도 되는지 계산한다","현실적 판단",{planning:2,stable:1}]
   ]},
-  {scene:"🚨 사고", q:"작은 업무 사고가 났다.", options:[
-    ["바로 공유하고 수습 들어감","빠른 자수",{loud:1,impulse:1,social:1}],
-    ["조용히 고쳐놓고 나중에 말함","흔적 지우기",{solo:2,ghost:1}],
-    ["재발 방지 체크리스트 만듦","사고도 자산",{plan:2,detail:2}],
-    ["일단 멘탈이 얼굴에 뜸","시스템 오류",{stable:1,ghost:1}]
+  {tag:"🍻 회식", title:"회식 끝나고 동기랑 집 가는 길.", sub:"이때 진짜 리뷰가 시작된다.", options:[
+    ["방금 있었던 일 조용히 복기한다","퇴근길 회의록",{detail:1,planning:1}],
+    ["그냥 웃긴 포인트만 말한다","살아남는 방식",{social:2,impulse:1}],
+    ["회사 얘기 안 하고 딴 얘기한다","퇴근 후 회사 차단",{stable:2,silent:1}],
+    ["갑자기 진심 상담 모드 들어간다","밤 되면 깊어짐",{social:2,talk:1}]
   ]},
-  {scene:"🧃 휴식", q:"쉬는 시간에 너는?", options:[
-    ["동기랑 회사 썰 업데이트","정보 교류",{social:2,loud:1}],
-    ["혼자 조용히 폰 봄","충전 중",{solo:2,ghost:1}],
-    ["새로운 밈/릴스 공유","이건 봐야 됨",{idea:1,loud:1}],
-    ["쉬면서도 할 일 정리","쉬는 게 아님",{plan:2,detail:1}]
+  {tag:"🧪 새것", title:"누가 ‘이 방식 너무 구식 아닌가?’ 했다.", sub:"바꿀 것인가, 지킬 것인가.", options:[
+    ["바로 새 방식 찾아본다","변화 못 참음",{idea:2,impulse:1}],
+    ["일단 왜 구식인지부터 본다","근거 필요",{planning:2,detail:1}],
+    ["바꿔도 팀이 따라올지 걱정한다","사람 먼저",{social:2,stable:1}],
+    ["혼자 테스트해보고 괜찮으면 공유한다","조용한 베타테스터",{solo:1,idea:2}]
   ]},
-  {scene:"🙋 요청", q:"누가 ‘이거 오늘 가능?’이라고 물었다.", options:[
-    ["가능하다고 하고 나중에 후회","입이 빠름",{impulse:2,social:1}],
-    ["일정 보고 가능 범위 딱 자름","현실적",{plan:2,stable:1}],
-    ["일단 혼자 처리해버림","말보다 손",{solo:2,impulse:1}],
-    ["읽고 잠깐 사라짐","답장 준비중",{ghost:2,stable:1}]
+  {tag:"🧊 회의", title:"회의 시간이 10분 남았는데 안건이 3개 남았다.", sub:"누군가는 시간을 봐야 한다.", options:[
+    ["우선순위 정해서 자른다","현실 관리자",{planning:2,stable:1}],
+    ["‘이건 따로 잡죠’ 한다","캘린더 증식",{talk:2,planning:1}],
+    ["빠르게 결정하고 넘어가자고 한다","속도 중시",{launch:2,impulse:1}],
+    ["조용히 있다가 끝나고 정리본 보낸다","회의 후 처리반",{solo:1,silent:1,detail:1}]
   ]},
-  {scene:"🔔 알림", q:"업무 알림이 계속 울릴 때?", options:[
-    ["바로바로 반응하다가 하루 끝남","알림의 노예",{loud:1,social:1,impulse:1}],
-    ["몰아서 봄. 그래서 늦음","배치 처리",{ghost:2,solo:1}],
-    ["우선순위대로 정리함","알림도 정돈",{plan:2,detail:1}],
-    ["중요한 것만 대충 감으로 찍음","생존 감각",{rough:2,stable:1}]
+  {tag:"📱 단톡", title:"주말에 회사 관련 알림이 왔다.", sub:"핸드폰이 울렸고 마음도 울림.", options:[
+    ["내용만 확인하고 월요일의 나에게 넘긴다","선 지킴",{stable:2,silent:1}],
+    ["찝찝해서 바로 처리한다","쉬는 중에도 업무 모드",{solo:1,detail:1,launch:1}],
+    ["단톡에 ‘이거 월요일에 보죠’라고 말한다","평화 선언",{social:1,stable:2}],
+    ["보다가 새 아이디어 떠올라서 메모한다","주말 뇌가 더 위험",{idea:2,impulse:1}]
   ]},
-  {scene:"🎨 취향", q:"결과물이 ‘뭔가 애매하다’고 느껴질 때?", options:[
-    ["무드/톤이 안 맞는다고 말함","느낌 경찰",{detail:2,social:1}],
-    ["숫자나 근거가 부족하다고 봄","감 말고 근거",{plan:2,detail:1}],
-    ["일단 다른 시안 만들어봄","손이 빠름",{impulse:2,idea:1}],
-    ["말하면 길어질 것 같아 일단 참음","표정만 제출",{ghost:1,stable:1}]
+  {tag:"📂 파일", title:"공유 문서에 누가 이상한 수정 남겼다.", sub:"이름은 안 보이는데 누군지 알 것 같음.", options:[
+    ["수정 히스토리부터 확인한다","범인 찾기 아님. 맞음",{detail:2,planning:1}],
+    ["그냥 내가 고친다","말하면 길어짐",{solo:2,stable:1}],
+    ["단톡에 부드럽게 물어본다","사회적 쿠션 장착",{social:2,talk:1}],
+    ["방향 자체를 다시 제안한다","문서 하나가 판을 키움",{idea:2,talk:1}]
   ]},
-  {scene:"🧑‍🤝‍🧑 동기", q:"동기들이 너를 찾는 순간은?", options:[
-    ["분위기 수습 필요할 때","말랑 소방수",{social:3,stable:1}],
-    ["빠르게 뭐라도 만들어야 할 때","돌격대장",{impulse:2,rough:1}],
-    ["최종 확인이 필요할 때","인간 검수기",{detail:3}],
-    ["새로운 방법이 필요할 때","도구상자",{idea:3}]
+  {tag:"🍚 점심", title:"점심 먹고 자리로 돌아왔는데 할 일이 산더미다.", sub:"식곤증과 현실이 동시에 옴.", options:[
+    ["작은 것부터 체크하면서 시작한다","체크가 나를 살림",{detail:1,planning:2}],
+    ["일단 제일 급한 거부터 친다","불 끄기 전문",{launch:2,stable:1}],
+    ["커피 사러 가면서 머릿속 정리한다","카페인 전략가",{planning:1,idea:1}],
+    ["조용히 이어폰 끼고 사라진다","말 걸지 마세요",{solo:2,silent:1}]
   ]},
-  {scene:"📤 공유", q:"자료를 단톡에 올릴 때 멘트는?", options:[
-    ["‘일단 초안입니다!’","방어막 설치",{rough:1,impulse:1}],
-    ["‘확인 부탁드립니다. 특히 2p.’","포인트 지정",{plan:1,detail:2}],
-    ["‘야르 이거 한번 봐봐’","친구톤",{loud:2,social:1}],
-    ["멘트 없이 파일만 띡","쿨한 척",{solo:1,ghost:1}]
+  {tag:"💬 메신저", title:"동기가 ‘이거 어떻게 생각해?’라고 물었다.", sub:"진짜 의견을 원하는 걸까, 위로를 원하는 걸까.", options:[
+    ["좋은 점 먼저 말하고 조심스럽게 의견 준다","말랑 포장",{social:2,stable:1}],
+    ["바로 핵심 문제를 말한다","팩트가 먼저 나감",{detail:2,talk:1}],
+    ["비슷한 레퍼런스를 찾아서 보낸다","자료로 말함",{planning:1,idea:1}],
+    ["직접 수정 예시를 만들어준다","손이 먼저 움직임",{solo:2,launch:1}]
   ]},
-  {scene:"🧘 안정", q:"업무 방식이 갑자기 바뀌었다.", options:[
-    ["왜 바뀌는지 먼저 알아야 함","납득형",{plan:2,stable:2}],
-    ["오히려 재밌음. 새 판 ㄱ","변화 환영",{idea:2,impulse:1}],
-    ["겉으론 괜찮다는데 표정 굳음","개티남",{stable:1,ghost:1}],
-    ["바뀐 김에 내가 다시 정리함","정리본 생산",{plan:2,solo:1}]
+  {tag:"🔥 마감", title:"팀원이 ‘거의 다 됐어요’라고 했다.", sub:"거의 다 됐다는 말만큼 애매한 말도 없음.", options:[
+    ["어디까지 됐는지 구체적으로 물어본다","불안해서 확인",{detail:2,planning:1}],
+    ["믿고 기다린다","생각보다 너그러움",{stable:2,social:1}],
+    ["혹시 몰라 백업안을 만든다","혼자 보험 들기",{solo:2,planning:1}],
+    ["‘필요하면 같이 볼게요’ 하고 회의를 잡는다","도움과 회의 사이",{talk:2,social:1}]
   ]},
-  {scene:"🌙 야근각", q:"오늘 야근각이 보인다. 너는?", options:[
-    ["갑자기 집중력 올라감","이제 시작",{impulse:2,rough:1}],
-    ["필요한 것만 쳐내고 범위 조정","현실주의",{plan:2,stable:1}],
-    ["동기들 상태부터 살핌","다 같이 살자",{social:2,stable:1}],
-    ["말없이 처리하다가 사라짐","햄스터 모드",{solo:2,ghost:1}]
+  {tag:"🧃 동기방", title:"퇴근 후 동기방에 ‘오늘 ㄹㅈㄷ’가 올라왔다.", sub:"무슨 일인지 안 봐도 대충 알 것 같음.", options:[
+    ["바로 ‘왜왜’ 하고 들어간다","소식 못 참음",{talk:2,social:1}],
+    ["읽고 웃고 리액션만 누른다","조용한 참여",{silent:1,social:1}],
+    ["상황 정리해달라고 한다","맥락 없으면 못 웃음",{planning:1,detail:1}],
+    ["내일 봐도 되는 얘기면 핸드폰 내려놓는다","퇴근 후 방어막",{stable:2,silent:1}]
   ]},
-  {scene:"📸 캡쳐각", q:"이 테스트 결과가 나오면 너는?", options:[
-    ["바로 단톡에 올리고 ‘누구냐’ 함","저격 개시",{loud:2,social:2}],
-    ["찔려서 조용히 저장만 함","나잖아",{ghost:2,stable:1}],
-    ["동기들 유형 분류표 만들고 싶어짐","도감화",{plan:2,idea:1}],
-    ["결과 문구 오탈자부터 봄","직업병",{detail:2}]
+  {tag:"🎯 마지막", title:"이 테스트 결과를 동기방에 보낼 때", sub:"자기 객관화와 놀림 사이.", options:[
+    ["캡쳐해서 ‘나 이거 아닌데?’라고 보낸다","대부분 맞음",{talk:1,social:1}],
+    ["맞는 것 같아서 조용히 저장만 한다","내적 인정",{silent:1,detail:1}],
+    ["동기들 결과까지 분석할 준비가 된다","이제부터 진짜 시작",{planning:1,idea:1}],
+    ["결과 보고 바로 다시 한다","다른 유형도 궁금함",{impulse:1,launch:1}]
   ]}
 ];
 
-function resetScores(){ axes.forEach(a => scores[a]=0); }
-function addScores(obj){ Object.entries(obj).forEach(([k,v]) => scores[k]=(scores[k]||0)+v); }
-
-function typeScore(t){
-  const s=scores;
-  const rules = {
-    bomb: s.impulse*1.4+s.idea*1.35+s.loud*1.1-s.plan*.35,
-    ghost: s.ghost*1.6+s.solo*.55+s.stable*.35-s.loud*.25,
-    checklist: s.detail*1.55+s.plan*1.05-s.rough*.45,
-    send: s.rough*1.35+s.impulse*1.15+s.loud*.45-s.detail*.35,
-    meeting: s.plan*1.15+s.loud*.75+s.social*.8+s.stable*.4,
-    tool: s.idea*1.45+s.impulse*.7+s.loud*.55-s.stable*.25,
-    hamster: s.solo*1.45+s.impulse*.55+s.detail*.35-s.loud*.25,
-    face: s.ghost*.7+s.detail*.5+s.stable*.8+s.social*.25,
-    mood: s.social*1.55+s.stable*.75+s.food*.25-s.solo*.25,
-    late: s.impulse*1.2+s.rough*.75+s.idea*.6+s.party*.25-s.plan*.25
-  };
-  return rules[t];
+const app = document.getElementById("app");
+function shell(content){ app.innerHTML = `<div class="app"><header class="topbar"><div class="topbar-inner"><div class="brand"><span class="brand-badge">😈</span><span>오피스 빌런 테스트</span></div><button class="ghost" onclick="renderHome()">처음</button></div></header><div class="page">${content}</div></div><div id="toast" class="toast"></div>`; }
+function mascotHTML(typeKey="bomb", small=false){
+  const t = villains[typeKey] || typeKey;
+  const classes = ["mascot", small?"small":"", t.mascot].filter(Boolean).join(" ");
+  const props = (t.prop||"").split(" ").filter(Boolean).map(p=>`<i class="prop ${p}"></i>`).join("");
+  return `<div class="${classes}" style="--type:${t.color}"><i class="ear l"></i><i class="ear r"></i><i class="body"></i><i class="eye l"></i><i class="eye r"></i><i class="cheek l"></i><i class="cheek r"></i><i class="mouth"></i><i class="paw l"></i><i class="paw r"></i><i class="foot l"></i><i class="foot r"></i>${props}</div>`;
 }
-function getWinner(){ return Object.keys(types).sort((a,b)=>typeScore(b)-typeScore(a))[0]; }
-function topAxes(){ return Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,4); }
-const axisLabel={impulse:"즉흥력",plan:"정리병",loud:"단톡화력",ghost:"잠수력",detail:"검수본능",rough:"일단력",idea:"아이디어광",stable:"안정추구",social:"동기케어",solo:"혼자처리",food:"밥진심",party:"회식생존"};
-
-const app=document.querySelector('#app');
-function shell(content){app.innerHTML=`<div class="shell fade"><nav class="nav"><div class="brand"><div class="logo"></div><span>오피스 빌런 테스트</span></div><div class="tag">동기 단톡방 저격용 · 30문항</div></nav>${content}</div>`}
-function character(tkey){const t=types[tkey];return `<div class="character" style="--c:${t.color};--d:${t.color}"><div class="ear l"></div><div class="ear r"></div><div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"></div><div class="leg r"></div><div class="head"><div class="eye l"></div><div class="eye r"></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="badge-id"></div><div class="prop p1">${t.prop1}</div><div class="prop p2">${t.prop2}</div></div>`}
-function home(){shell(`<section class="hero card"><div><div class="kicker">😈 개밤티 오피스 버전</div><h1>나는 어떤<br/>오피스 빌런?</h1><p>동기들이랑 메신저할 때, 밥 먹을 때, 회식할 때 나오는 진짜 습관으로 보는 업무 민폐력 테스트. 결과 나오면 캡쳐해서 단톡방에 던지기 딱 좋게 만들었음.</p><div class="btnrow"><button class="btn primary" onclick="start()">테스트 시작하기</button><button class="btn ghost" onclick="showResult('bomb')">결과 카드 미리보기</button></div><p class="notice">※ 진지한 인사평가 아님. 찔리면 보통 맞음.</p></div><div class="preview card"><div class="sticker s1">#OO빌런</div><div class="sticker s2">야르 이거 누구냐</div><div class="bubble"></div><div class="charwrap">${character('bomb')}</div><div class="sample-title"><b>퇴근직전폭탄러</b><span>“아 맞다, 이것도 가능할 듯?”</span></div></div></section>`)}
-function start(){current=0;resetScores();renderQuestion();}
-function renderQuestion(){const item=questions[current];const pct=(current/questions.length)*100;shell(`<section class="test card"><div class="progressTop"><div class="count">${current+1} / ${questions.length}</div><div class="bar"><div style="width:${pct}%"></div></div></div><div class="qcard"><div class="scene">${item.scene}</div><h2 class="question">${item.q}</h2><div class="options">${item.options.map((op,i)=>`<button class="option" onclick="answer(${i})"><span class="opIcon">${op[0].trim()[0]}</span><span class="opText">${op[0].replace(/^\S+\s?/, '')}<span class="opSub">${op[1]}</span></span></button>`).join('')}</div></div></section>`)}
-function answer(i){addScores(questions[current].options[i][2]);current++; if(current>=questions.length) showResult(getWinner()); else renderQuestion();}
-function villainPercent(tkey){const raw=Math.max(0,Math.round(typeScore(tkey)*4.2+42));return Math.min(99,raw)}
-function showResult(tkey){const t=types[tkey];const vp=villainPercent(tkey);const axesTop=topAxes();shell(`<section class="result card" style="--main:${t.color};--pale:${t.pale}"><div class="resultHero"><div class="resultCharacter">${character(tkey)}</div><div class="resultMain"><div class="smallcaps">${t.icon} 당신의 오피스 빌런 유형</div><h1 class="resultTitle">${t.name}</h1><div class="quote">“${t.quote}”</div><p class="desc">${t.desc}</p><div class="chips">${t.tags.map(x=>`<span class="chip">${x}</span>`).join('')}</div></div></div><div class="resultBody"><div class="sectionGrid"><div class="box"><h3>📊 빌런 지표</h3><div class="meter"><div class="meterLine"><div class="meterHead"><span>빌런력</span><span>${vp}%</span></div><div class="meterBar"><div class="meterFill" style="width:${vp}%"></div></div></div><div class="meterLine"><div class="meterHead"><span>동기 피해 체감도</span><span>${Math.min(99,vp+7)}%</span></div><div class="meterBar"><div class="meterFill" style="width:${Math.min(99,vp+7)}%"></div></div></div><div class="meterLine"><div class="meterHead"><span>본인 자각률</span><span>${Math.max(8,100-vp)}%</span></div><div class="meterBar"><div class="meterFill" style="width:${Math.max(8,100-vp)}%"></div></div></div></div></div><div class="box"><h3>🧬 왜 이 유형이냐면</h3><div class="list">${t.why.map(x=>`<div class="li"><span>•</span><span>${x}</span></div>`).join('')}</div></div></div><div class="sectionGrid"><div class="box"><h3>💬 동기들이랑 메신저할 때</h3><div class="list">${t.chat.map(x=>`<div class="talk">${x}</div>`).join('')}</div></div><div class="box"><h3>🍚 밥/☕ 커피 먹을 때</h3><div class="list">${t.lunch.map(x=>`<div class="li"><span>${x.slice(0,2)}</span><span>${x.slice(2)}</span></div>`).join('')}</div></div></div><div class="sectionGrid"><div class="box"><h3>🍻 회식 출몰 패턴</h3><div class="list">${t.party.map(x=>`<div class="li"><span>${x.slice(0,2)}</span><span>${x.slice(2)}</span></div>`).join('')}</div></div><div class="box"><h3>🧃 네 안의 상위 성향</h3><div class="chips">${axesTop.map(([k,v])=>`<span class="chip">${axisLabel[k]} ${v}</span>`).join('')}</div><div class="pair" style="margin-top:12px"><div><b>잘 맞는 공범</b>${t.good}</div><div><b>상극 피해자</b>${t.bad}</div></div></div></div><div class="actions"><button class="btn primary" onclick="start()">다시 하기</button><button class="btn ghost" onclick="copyResult('${t.name}')">결과 문구 복사</button><button class="btn ghost" onclick="home()">처음으로</button></div><p class="notice">캡쳐해서 단톡방에 올린 뒤 “야르 이거 누구냐” 하면 완성.</p></div></section>`)}
-function copyResult(name){const text=`나의 오피스 빌런 유형은 ${name} 😈\n야르 이거 나 맞냐`;navigator.clipboard?.writeText(text);alert('결과 문구 복사됨! 단톡방 ㄱ');}
-window.start=start;window.answer=answer;window.showResult=showResult;window.home=home;window.copyResult=copyResult;
-home();
+function renderHome(){
+  shell(`<section class="hero"><div class="hero-card"><span class="kicker">동기방 투척용 · 3분 컷</span><h1>나는 어떤<br>오피스 빌런일까?</h1><p class="lead">회사 동기들이랑 하면 더 재밌는 현실고증 테스트. 착한 척 안 하고, 은근히 찔리게 나옵니다.</p><div class="mascot-stage">${mascotHTML("bomb")}<div class="bubble-note">“급한 건 아닌데…”</div><div class="mini-note">결과 캡쳐각</div></div><div class="home-points"><div class="point"><b>30</b><span>현실 문항</span></div><div class="point"><b>10</b><span>빌런 유형</span></div><div class="point"><b>0</b><span>회원가입</span></div></div><button class="primary" onclick="startTest()">테스트 시작하기</button></div></section>`);
+}
+function startTest(){ state.index=0; state.answers=[]; axes.forEach(a=>state.scores[a]=0); renderQuestion(); }
+function renderQuestion(){
+  const q = questions[state.index];
+  const pct = Math.round((state.index/questions.length)*100);
+  shell(`<section><div class="progress-wrap"><div class="progress-head"><span>${state.index+1} / ${questions.length}</span><span>${pct}%</span></div><div class="progress"><div style="width:${pct}%"></div></div></div><div class="question-card"><span class="tag">${q.tag}</span><h1 class="question-title">${q.title}</h1><p class="question-sub">${q.sub}</p><div class="options">${q.options.map((o,i)=>`<button class="option" onclick="answer(${i})"><span class="letter">${String.fromCharCode(65+i)}</span><span class="opt-main"><span class="opt-text">${o[0]}</span><span class="opt-caption">${o[1]}</span></span></button>`).join("")}</div><div class="nav-row">${state.index>0?`<button class="ghost" onclick="goBack()">이전으로</button>`:""}</div></div></section>`);
+}
+function answer(i){
+  const q = questions[state.index]; const scores = q.options[i][2];
+  state.answers.push({q:state.index, i, scores}); Object.entries(scores).forEach(([k,v])=>state.scores[k]+=v);
+  state.index++; if(state.index>=questions.length) renderResult(); else renderQuestion();
+}
+function goBack(){
+  const last = state.answers.pop(); if(!last) return; Object.entries(last.scores).forEach(([k,v])=>state.scores[k]-=v); state.index = last.q; renderQuestion();
+}
+function resultType(){
+  let best = null, bestScore = -999;
+  for(const [key,t] of Object.entries(villains)){
+    let s = 0; for(const [axis,w] of Object.entries(t.formula)) s += (state.scores[axis]||0)*w;
+    if(s>bestScore){bestScore=s; best=key;}
+  }
+  return best;
+}
+function topAxes(){ return Object.entries(state.scores).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>axisNames[k]); }
+function renderResult(){
+  const key = resultType(); const t = villains[key]; const top = topAxes(); const villainPower = Math.min(98, Math.max(72, 74 + Math.round((state.scores[top[0]]||15)*1.2) + key.length%7));
+  shell(`<section class="result-card" id="result-card" style="--type:${t.color}"><div class="result-head"><span class="result-kicker">${t.hash}</span><h1 class="result-title">${t.name}</h1><p class="result-quote">“${t.quote}”</p></div><div class="result-mascot">${mascotHTML(key)}</div><div class="score-card"><div class="meter-row"><span>빌런력</span><strong class="meter-num">${villainPower}%</strong></div><div class="meter"><div style="width:${villainPower}%"></div></div><p class="question-sub" style="margin:10px 0 0">주요 성향: ${top.join(" · ")}</p></div><div class="section"><h3>한줄 요약</h3><div class="line">${t.desc}</div></div><div class="section"><h3>주요 범행 패턴</h3><div class="lines">${t.traits.map(x=>`<div class="line"><span>•</span><span>${x}</span></div>`).join("")}</div></div><div class="section"><h3>동기방 출몰 멘트</h3><div class="chat-list">${t.chats.map((x,i)=>`<div class="chat ${i%2?"me":""}">${x}</div>`).join("")}</div></div><div class="section"><h3>🍚 점심 / 🍻 회식 모드</h3><div class="lines">${t.lunch.map(x=>`<div class="line"><span>🍚</span><span>${x}</span></div>`).join("")}${t.dinner.map(x=>`<div class="line"><span>🍻</span><span>${x}</span></div>`).join("")}</div></div><div class="section"><h3>궁합</h3><div class="match-grid"><div class="match"><small>잘 맞는 공범</small><b>${t.good}</b></div><div class="match"><small>상극 피해자</small><b>${t.bad}</b></div></div></div><div class="actions"><button class="primary save" onclick="saveResult()">결과 이미지 저장</button><button class="primary restart" onclick="startTest()">다시 하기</button></div></section>`);
+}
+function toast(msg){ const el=document.getElementById("toast"); if(!el) return; el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
+async function saveResult(){
+  const target=document.getElementById("result-card");
+  if(!window.html2canvas){ toast("캡쳐 라이브러리 로딩 중이에요. 잠깐 뒤 다시 눌러주세요."); return; }
+  const canvas=await html2canvas(target,{backgroundColor:"#f7f8fb",scale:2,useCORS:true});
+  const a=document.createElement("a"); a.download="office-villain-result.png"; a.href=canvas.toDataURL("image/png"); a.click(); toast("이미지 저장 완료");
+}
+window.renderHome=renderHome; window.startTest=startTest; window.answer=answer; window.goBack=goBack; window.saveResult=saveResult;
+renderHome();
